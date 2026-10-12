@@ -15,7 +15,7 @@ export function CoinCard({ row }: { row: CoinRow }) {
       href={`/coin/${row.token}`}
       className="group overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] transition-all hover:-translate-y-0.5 hover:border-[var(--muted-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
     >
-      <div className="relative h-[140px] bg-gradient-to-br from-[#171c10] to-[#0b0d09]">
+      <div className="relative h-[140px] bg-[var(--card)]">
         {row.logo ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={row.logo} alt="" className="h-full w-full object-cover" />

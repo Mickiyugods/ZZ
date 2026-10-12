@@ -11,6 +11,7 @@ import {
   IconRocket,
   IconWallet,
   IconLayoutGrid,
+  IconUser,
 } from "@tabler/icons-react";
 import { Sidebar, SidebarHeader, SidebarNav, SidebarSection, SidebarItem, SidebarFooter, SidebarToggle, useSidebar } from "@/components/ui/sidebar";
 import { mobileSidebarStore } from "@/lib/mobileSidebarStore";
@@ -25,6 +26,7 @@ const NAV = [
   { href: "/cards", label: "Card Vaults", icon: IconCards },
   { href: "/collections", label: "Collections", icon: IconLayoutGrid },
   { href: "/launch", label: "Launch", icon: IconRocket },
+  { href: "/profile", label: "Profile", icon: IconUser },
 ];
 
 const RAIL_WIDTH = 72;
@@ -45,7 +47,7 @@ function Brand() {
   const { collapsed } = useSidebar();
   return (
     <Link href="/" className={cn("flex min-w-0 items-center gap-2.5 rounded-lg", focusRing)} onClick={() => mobileSidebarStore.hide()}>
-      <span className="flex size-8 shrink-0 items-center justify-center rounded-[9px] bg-gradient-to-br from-[var(--primary)] to-[#9fcb2a] text-[16px] font-bold text-[var(--primary-foreground)]">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-[9px] bg-[var(--primary)] text-[16px] font-bold text-[var(--primary-foreground)]">
         Z
       </span>
       {!collapsed && <span className="truncate font-display text-[20px] font-bold">ZEEP</span>}
@@ -88,7 +90,7 @@ function WalletButton() {
         "flex min-h-11 w-full items-center justify-center rounded-full px-5 text-[14px] font-semibold transition-colors",
         focusRing,
         !wallet.connected
-          ? "bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[#e3ff6e]"
+          ? "bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[#e5e5e5]"
           : "border border-[var(--border)] hover:border-[var(--muted-foreground)]",
       )}
     >
@@ -106,7 +108,7 @@ function LaunchCta() {
         onClick={() => mobileSidebarStore.hide()}
         aria-label="Launch a coin"
         title="Launch a coin"
-        className={cn("flex size-11 items-center justify-center self-center rounded-full bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[#e3ff6e]", focusRing)}
+        className={cn("flex size-11 items-center justify-center self-center rounded-full bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[#e5e5e5]", focusRing)}
       >
         <IconRocket className="size-[18px]" stroke={1.75} />
       </Link>
@@ -116,7 +118,7 @@ function LaunchCta() {
     <Link
       href="/launch"
       onClick={() => mobileSidebarStore.hide()}
-      className={cn("flex min-h-11 w-full items-center justify-center rounded-full bg-[var(--primary)] px-5 text-center text-[14px] font-semibold text-[var(--primary-foreground)] hover:bg-[#e3ff6e]", focusRing)}
+      className={cn("flex min-h-11 w-full items-center justify-center rounded-full bg-[var(--primary)] px-5 text-center text-[14px] font-semibold text-[var(--primary-foreground)] hover:bg-[#e5e5e5]", focusRing)}
     >
       Launch a coin
     </Link>

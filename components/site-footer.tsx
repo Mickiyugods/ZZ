@@ -5,7 +5,7 @@ export function SiteFooter() {
     <footer className="mt-20 border-t border-[var(--border)] py-9">
       <div className="mx-auto flex max-w-[1180px] flex-col items-start gap-3 px-6 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-2 font-display text-[18px] font-bold">
-          <span className="flex size-8 items-center justify-center rounded-[9px] bg-gradient-to-br from-[var(--primary)] to-[#9fcb2a] text-[16px] font-bold text-[var(--primary-foreground)]">
+          <span className="flex size-8 items-center justify-center rounded-[9px] bg-[var(--primary)] text-[16px] font-bold text-[var(--primary-foreground)]">
             Z
           </span>
           ZEEP

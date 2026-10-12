@@ -37,9 +37,14 @@ async function json<T>(url: string, opts?: RequestInit): Promise<T> {
   return data as T;
 }
 
-export function listCoins(opts: { list?: "new" | "top" | "nfts"; search?: string; token?: string } = {}) {
-  const { list = "new", search = "", token = "" } = opts;
-  const q = new URLSearchParams({ list, ...(search ? { search } : {}), ...(token ? { token } : {}) });
+export function listCoins(opts: { list?: "new" | "top" | "nfts"; search?: string; token?: string; deployer?: string } = {}) {
+  const { list = "new", search = "", token = "", deployer = "" } = opts;
+  const q = new URLSearchParams({
+    list,
+    ...(search ? { search } : {}),
+    ...(token ? { token } : {}),
+    ...(deployer ? { deployer } : {}),
+  });
   return json<CoinsResponse>(`/api/tokens?${q}`);
 }
 

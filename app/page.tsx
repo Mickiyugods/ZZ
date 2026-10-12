@@ -6,6 +6,7 @@ import { listCoins, type CoinRow } from "@/lib/api";
 import { fmtEth, fmtInt } from "@/lib/format";
 import { CoinCard, CoinCardSkeleton } from "@/components/coin-card";
 import { Hero10 } from "@/components/ui/hero-10";
+import { useWallet } from "@/lib/useWallet";
 import { cn } from "@/lib/utils";
 
 const focusRing =
@@ -38,9 +39,11 @@ const HERO_IMAGES = [
 const HERO_IMAGE_ALTS = ["Bored Ape Yacht Club", "Pudgy Penguins", "Milady Maker"];
 
 export default function HomePage() {
+  const wallet = useWallet();
   const [totals, setTotals] = React.useState<{ coins: number; vaultEth: number; nftsHeld: number } | null>(null);
   const [rows, setRows] = React.useState<CoinRow[] | null>(null);
   const [error, setError] = React.useState(false);
+  const [myTotals, setMyTotals] = React.useState<{ coins: number; vaultEth: number } | null>(null);
 
   React.useEffect(() => {
     document.title = "ZEEP — memecoins with a vault inside";
@@ -54,6 +57,16 @@ export default function HomePage() {
       })
       .catch(() => setError(true));
   }, []);
+
+  React.useEffect(() => {
+    if (!wallet.connected || !wallet.address) {
+      setMyTotals(null);
+      return;
+    }
+    listCoins({ deployer: wallet.address })
+      .then((data) => setMyTotals({ coins: data.coins, vaultEth: data.vaultEth }))
+      .catch(() => setMyTotals(null));
+  }, [wallet.connected, wallet.address]);
 
   return (
     <>
@@ -91,6 +104,25 @@ export default function HomePage() {
         </div>
       </section>
 
+      {wallet.connected && (
+        <section className="mx-auto max-w-[1180px] px-6 pb-10">
+          <Link
+            href="/profile"
+            className={cn(
+              "flex flex-col items-start justify-between gap-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] px-6 py-4 hover:border-[var(--muted-foreground)] sm:flex-row sm:items-center",
+              focusRing,
+            )}
+          >
+            <span className="text-[14px]">
+              You&apos;ve launched <strong className="font-mono-tabular">{myTotals ? fmtInt(myTotals.coins) : "…"}</strong>{" "}
+              {myTotals?.coins === 1 ? "coin" : "coins"} ·{" "}
+              <strong className="font-mono-tabular">{myTotals ? fmtEth(myTotals.vaultEth) : "…"}</strong> ETH in vaults
+            </span>
+            <span className="text-[13px] font-semibold text-[var(--primary)]">View profile →</span>
+          </Link>
+        </section>
+      )}
+
       <section className="mx-auto max-w-[1180px] px-6 py-16">
         <div className="flex flex-col items-start justify-between gap-6 rounded-[var(--radius)] border border-[var(--border)] bg-gradient-to-br from-[var(--card)] to-[var(--background)] p-9 md:flex-row md:items-center">
           <div>
@@ -105,7 +137,7 @@ export default function HomePage() {
           </div>
           <Link
             href="/cards"
-            className={cn("flex min-h-11 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-[14px] font-semibold text-[var(--primary-foreground)] hover:bg-[#e3ff6e]", focusRing)}
+            className={cn("flex min-h-11 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-[14px] font-semibold text-[var(--primary-foreground)] hover:bg-[#e5e5e5]", focusRing)}
           >
             See Card Vaults →
           </Link>

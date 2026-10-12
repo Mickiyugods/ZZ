@@ -36,7 +36,7 @@ export function Topbar() {
         <BaselineDensityMediumIcon size={18} />
       </button>
       <Link href="/" className={cn("flex items-center gap-2 rounded-[var(--primitive-radius-control-sm,0.5rem)] font-display text-[17px] font-bold", focusRing)}>
-        <span className="flex size-8 items-center justify-center rounded-[9px] bg-gradient-to-br from-[var(--primary)] to-[#9fcb2a] text-[16px] font-bold text-[var(--primary-foreground)]">
+        <span className="flex size-8 items-center justify-center rounded-[9px] bg-[var(--primary)] text-[16px] font-bold text-[var(--primary-foreground)]">
           Z
         </span>
         ZEEP

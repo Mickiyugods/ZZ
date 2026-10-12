@@ -18,7 +18,7 @@ export function PrivyAppProvider({ children }: { children: React.ReactNode }) {
         loginMethods: ["wallet", "email"],
         appearance: {
           theme: "dark",
-          accentColor: "#D6FF3F",
+          accentColor: "#FFFFFF",
         },
         defaultChain: robinhoodChain,
         supportedChains: [robinhoodChain],

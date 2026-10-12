@@ -7,32 +7,32 @@
 :root {
   color-scheme: dark;
 
-  /* shadcn-style tokens, mapped to ZEEP's dark + electric-lime palette */
-  --background: #07080a;
-  --foreground: #edf2e3;
-  --card: #12140f;
-  --card-foreground: #edf2e3;
-  --popover: #12140f;
-  --popover-foreground: #edf2e3;
-  --primary: #d6ff3f;
-  --primary-foreground: #11140a;
-  --secondary: #171a12;
-  --secondary-foreground: #edf2e3;
-  --muted: #12140f;
-  --muted-foreground: #9aa38c;
-  --accent: #171a12;
-  --accent-foreground: #edf2e3;
+  /* shadcn-style tokens, mapped to ZEEP's pure black-and-white palette */
+  --background: #000000;
+  --foreground: #ffffff;
+  --card: #121212;
+  --card-foreground: #ffffff;
+  --popover: #121212;
+  --popover-foreground: #ffffff;
+  --primary: #ffffff;
+  --primary-foreground: #000000;
+  --secondary: #0d0d0d;
+  --secondary-foreground: #ffffff;
+  --muted: #0d0d0d;
+  --muted-foreground: #a1a1aa;
+  --accent: #1a1a1a;
+  --accent-foreground: #ffffff;
   --destructive: #ff6b57;
   --destructive-foreground: #11140a;
-  --border: #23271b;
-  --input: #23271b;
-  --ring: #d6ff3f;
-  --chart-1: #d6ff3f;
+  --border: #262626;
+  --input: #262626;
+  --ring: #ffffff;
+  --chart-1: #ffffff;
   --radius: 0.625rem;
 
   /* brand (used by the workspace mark in the sidebar) */
-  --color-brand: #d6ff3f;
-  --color-brand-foreground: #11140a;
+  --color-brand: #ffffff;
+  --color-brand-foreground: #000000;
 
   /* --primitive-* overrides consumed by components/ui/sidebar.tsx */
   --primitive-surface-selected: color-mix(in srgb, var(--primary) 12%, transparent);
@@ -63,8 +63,6 @@ body {
 body {
   margin: 0;
   background: var(--background);
-  background-image: radial-gradient(900px 500px at 85% -10%, rgba(214, 255, 63, 0.07), transparent 60%),
-    radial-gradient(700px 400px at -10% 20%, rgba(214, 255, 63, 0.04), transparent 60%);
   color: var(--foreground);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;

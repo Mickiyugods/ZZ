@@ -260,7 +260,7 @@ export default function CoinPage({ params }: { params: Promise<{ address: string
                     className={cn(
                       "flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] px-4 text-[13px] font-semibold text-[var(--muted-foreground)]",
                       focusRing,
-                      slippage === s && "border-[var(--primary)] bg-[rgba(214,255,63,.08)] text-[var(--primary)]",
+                      slippage === s && "border-[var(--primary)] bg-[rgba(255,255,255,.08)] text-[var(--primary)]",
                     )}
                   >
                     {s}%

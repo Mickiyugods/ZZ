@@ -115,14 +115,14 @@ export default function LaunchPage() {
             aria-current={i === step ? "step" : undefined}
             className={cn(
               "flex flex-1 items-center gap-3 border-b border-[var(--border)] bg-[var(--card)] px-4 py-4 sm:border-b-0 sm:border-r last:border-0",
-              i === step && "bg-[rgba(214,255,63,.08)]",
+              i === step && "bg-[rgba(255,255,255,.08)]",
             )}
           >
             <span
               aria-hidden="true"
               className={cn(
                 "flex size-[26px] shrink-0 items-center justify-center rounded-full text-[12px] font-bold",
-                i === step ? "bg-[var(--primary)] text-[var(--primary-foreground)]" : i < step ? "bg-[#9fcb2a] text-[var(--primary-foreground)]" : "bg-[var(--border)] text-[var(--muted-foreground)]",
+                i === step ? "bg-[var(--primary)] text-[var(--primary-foreground)]" : i < step ? "bg-[#a1a1aa] text-[var(--primary-foreground)]" : "bg-[var(--border)] text-[var(--muted-foreground)]",
               )}
             >
               {i < step ? <IconCheck className="size-[14px]" stroke={3} /> : i + 1}
@@ -198,7 +198,7 @@ export default function LaunchPage() {
                     className={cn(
                       "flex min-h-11 items-center gap-2.5 rounded-[var(--primitive-radius-control-sm,0.5rem)] border border-[var(--border)] p-3 text-left",
                       focusRing,
-                      collectionSlug === c.slug && "border-[var(--primary)] bg-[rgba(214,255,63,.07)]",
+                      collectionSlug === c.slug && "border-[var(--primary)] bg-[rgba(255,255,255,.07)]",
                     )}
                   >
                     <span className="size-[34px] shrink-0 rounded-lg bg-[var(--border)]" />
@@ -361,7 +361,7 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
       className={cn(
         "flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] px-4 text-[13px] font-semibold text-[var(--muted-foreground)]",
         focusRing,
-        active && "border-[var(--primary)] bg-[rgba(214,255,63,.08)] text-[var(--primary)]",
+        active && "border-[var(--primary)] bg-[rgba(255,255,255,.08)] text-[var(--primary)]",
       )}
     >
       {children}

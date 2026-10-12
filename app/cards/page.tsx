@@ -54,7 +54,7 @@ export default function CardVaultsPage() {
         <div className="mt-6">
           <Link
             href="/launch"
-            className={cn("inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-[14px] font-semibold text-[var(--primary-foreground)] hover:bg-[#e3ff6e]", focusRing)}
+            className={cn("inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-[14px] font-semibold text-[var(--primary-foreground)] hover:bg-[#e5e5e5]", focusRing)}
           >
             Launch a card vault
           </Link>

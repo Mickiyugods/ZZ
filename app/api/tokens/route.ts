@@ -1,4 +1,4 @@
-// GET /api/tokens?list=new|top|nfts&search=...&token=0x...
+// GET /api/tokens?list=new|top|nfts&search=...&token=0x...&deployer=0x...
 // Returns the ZEEP coin registry (each coin plus its vault state) and platform totals.
 
 import { NextRequest, NextResponse } from "next/server";
@@ -18,9 +18,11 @@ export async function GET(req: NextRequest) {
     const list = url.searchParams.get("list") || "new";
     const search = (url.searchParams.get("search") || "").trim().toLowerCase();
     const token = (url.searchParams.get("token") || "").trim().toLowerCase();
+    const deployer = (url.searchParams.get("deployer") || "").trim().toLowerCase();
 
     let rows = await store.list();
     if (token) rows = rows.filter((r) => r.token.toLowerCase() === token);
+    if (deployer) rows = rows.filter((r) => r.deployer?.toLowerCase() === deployer);
     if (search) {
       rows = rows.filter(
         (r) =>
