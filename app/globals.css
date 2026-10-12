@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+:root {
+  color-scheme: dark;
+
+  /* shadcn-style tokens, mapped to ZEEP's dark + electric-lime palette */
+  --background: #07080a;
+  --foreground: #edf2e3;
+  --card: #12140f;
+  --card-foreground: #edf2e3;
+  --popover: #12140f;
+  --popover-foreground: #edf2e3;
+  --primary: #d6ff3f;
+  --primary-foreground: #11140a;
+  --secondary: #171a12;
+  --secondary-foreground: #edf2e3;
+  --muted: #12140f;
+  --muted-foreground: #9aa38c;
+  --accent: #171a12;
+  --accent-foreground: #edf2e3;
+  --destructive: #ff6b57;
+  --destructive-foreground: #11140a;
+  --border: #23271b;
+  --input: #23271b;
+  --ring: #d6ff3f;
+  --chart-1: #d6ff3f;
+  --radius: 0.625rem;
+
+  /* brand (used by the workspace mark in the sidebar) */
+  --color-brand: #d6ff3f;
+  --color-brand-foreground: #11140a;
+
+  /* --primitive-* overrides consumed by components/ui/sidebar.tsx */
+  --primitive-surface-selected: color-mix(in srgb, var(--primary) 12%, transparent);
+  --primitive-surface-hover: color-mix(in srgb, var(--foreground) 5%, transparent);
+  --primitive-text-secondary: var(--muted-foreground);
+  --primitive-ring: var(--primary);
+  --primitive-radius-item: 0.625rem;
+  --primitive-radius-surface: 1rem;
+  --primitive-radius-control-sm: 0.5rem;
+  --primitive-surface-elevated: var(--card);
+  --primitive-shadow-raised: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  --primitive-chart-1: var(--chart-1);
+
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html,
+body {
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  background-image: radial-gradient(900px 500px at 85% -10%, rgba(214, 255, 63, 0.07), transparent 60%),
+    radial-gradient(700px 400px at -10% 20%, rgba(214, 255, 63, 0.04), transparent 60%);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.font-mono-tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.input {
+  width: 100%;
+  min-height: 44px;
+  border-radius: var(--primitive-radius-control-sm, 0.5rem);
+  border: 1px solid var(--border);
+  background: var(--background);
+  padding: 0.75rem 0.875rem;
+  font-size: 14px;
+  outline: none;
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
+.input:focus {
+  border-color: var(--primary);
+}
+.input:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+.input::placeholder {
+  color: var(--muted-foreground);
+}
+
+/* Skip-to-content link: hidden until keyboard-focused */
+.skip-link {
+  position: fixed;
+  top: -100px;
+  left: 16px;
+  z-index: 200;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: top 0.15s ease;
+}
+.skip-link:focus {
+  top: 16px;
+}
+
+/* Respect the user's motion preference across plain CSS transitions/animations.
+   Framer Motion components (the sidebar) already gate themselves via useReducedMotion(). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

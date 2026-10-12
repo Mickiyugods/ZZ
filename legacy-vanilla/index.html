@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ZEEP — memecoins with a vault inside</title>
+  <meta name="description" content="Launch a coin on Robinhood Chain, link it to any listed NFT collection, and let a share of every trade buy real NFTs for a raffle, hold or burn.">
+  <meta name="theme-color" content="#07080a">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="ZEEP — memecoins with a vault inside">
+  <meta property="og:description" content="A coin with a vault inside. Trading fees buy real NFTs and graded cards for holders.">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/css/zeep.css">
+  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/ethers@6.13.4/+esm">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a href="/" class="brand" data-link>
+        <span class="mark">Z</span>
+        ZEEP
+      </a>
+      <nav class="side-nav" aria-label="Main">
+        <a href="/" data-nav="home" data-link>Home</a>
+        <a href="/explore" data-nav="explore" data-link>Explore</a>
+        <a href="/cards" data-nav="cards" data-link>Card Vaults</a>
+        <a href="/launch" data-nav="launch" data-link>Launch</a>
+      </nav>
+      <div class="sidebar-spacer"></div>
+      <a href="/launch" class="btn btn-primary btn-block" data-link>Launch a coin</a>
+      <button class="btn btn-ghost btn-block wallet-btn" id="walletBtnSide" type="button" style="margin-top:8px">Connect wallet</button>
+      <div class="sidebar-foot">
+        <a href="https://www.ponsfamily.com" target="_blank" rel="noopener">Built on Pons</a>
+        <a href="https://robinhoodchain.blockscout.com" target="_blank" rel="noopener">Explorer</a>
+      </div>
+    </aside>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <div class="main-col">
+      <header class="topbar">
+        <button class="menu-toggle" id="menuToggle" type="button" aria-label="Menu">☰</button>
+        <a href="/" class="brand" data-link>
+          <span class="mark">Z</span>
+          ZEEP
+        </a>
+        <button class="btn btn-primary btn-sm wallet-btn" id="walletBtnTop" type="button">Connect wallet</button>
+      </header>
+
+      <main id="view" tabindex="-1"></main>
+
+      <footer class="site-footer">
+        <div class="wrap footer-row">
+          <div class="brand">
+            <span class="mark">Z</span>
+            ZEEP
+          </div>
+          <div class="footer-links">
+            <a href="/explore" data-link>Explore</a>
+            <a href="/cards" data-link>Card Vaults</a>
+            <a href="/launch" data-link>Launch</a>
+            <a href="https://www.ponsfamily.com" target="_blank" rel="noopener">Built on Pons</a>
+            <a href="https://robinhoodchain.blockscout.com" target="_blank" rel="noopener">Explorer</a>
+          </div>
+          <span class="faint" style="font-size:13px">Coins launched here are experimental and can lose all value.</span>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

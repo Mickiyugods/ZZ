@@ -1,0 +1,7 @@
+node_modules/
+artifacts/
+cache/
+cache_hardhat/
+ignition/deployments/
+ignition/parameters/robinhood.json
+.env

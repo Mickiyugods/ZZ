@@ -1,0 +1,113 @@
+# ZEEP
+
+Memecoin launchpad on Robinhood Chain (Pons V2 Factory/Router, same deployment MONETA uses), where a share of every coin's trading fees streams into a vault tied to one NFT collection. Adapted from the product category of vaul.app (not a clone — own name, own palette, own copy, no shared code or assets).
+
+## What ZEEP is (and is not)
+
+- A coin launcher: launching mints a regular Pons coin, same mechanism as MONETA (bonding curve, graduates to a Pons pool). ZEEP adds a **vault** on top via its own registry, not a Pons feature.
+- At launch, a coin is paired with one listed NFT collection and a fixed outcome (raffle to holders / hold / burn). These choices are stored in ZEEP's registry (`zeep_coins`) and shown everywhere, but are not enforced by a smart contract yet — see "Vault execution" below.
+- Not a gacha/loot-box product and never charges fiat for randomized rewards. The only "pull" mechanic is the raffle draw among a coin's existing holders, funded by trading fees the market already set.
+
+## Design direction: dark, electric lime, crypto-native
+
+- **Palette:** near-black background (`#07080a`), electric chartreuse accent (`#D6FF3F`), soft off-white text. Deliberately not Vaul's purple/glossy look.
+- **Type:** Space Grotesk for headlines, Inter for body/UI, JetBrains Mono for addresses/numbers.
+- **Layout:** left sidebar (persistent on desktop, slide-in drawer on mobile via a slim topbar) with nav + wallet button, hero with stacked NFT-card illustration, stats strip, mechanics grid (10 fixed-rule cells), coin cards, 4-step launch wizard, coin detail with buy/sell + vault panel.
+
+## Vault execution (current status: Phase 2 contracts built + tested, not deployed; app still runs Phase 1.5 simulation)
+
+- **Phase 1 (built):** coins launch as real Pons coins (verified on chain in `app/api/register/route.ts`, same salt-tag pattern as MONETA). The collection, outcome policy and creator tax are recorded in Supabase/`.data/`.
+- **Phase 1.5 (built, 2026-10, currently live):** `lib/server/keeper.ts`, run on a schedule by `app/api/cron/keeper/route.ts` (daily Vercel Cron, see `vercel.json`). Every write it makes is tagged `simulated: true` in `zeep_vault_events` — **no private key, no real ETH, nothing is actually bought.** What it actually does, and why each piece is real where it safely can be:
+  - **Harvest:** reads the *real* Pons escrow balance (`escrow.balanceOf(creatorFeeRecipient)` — a public view call, no key needed) for each coin's deployer. Any increase since the last tick (`last_harvested_escrow` on the coin row) is split 80/20 into that coin's simulated `vault_eth` / `protocol_eth`. A balance that *drops* (creator claimed independently) just resyncs the baseline — never subtracts.
+  - **Purchase:** once a coin's simulated `vault_eth` clears its collection's floor price (`lib/collections.ts`, ETH-denominated floors only — the real Courtyard card floors are USD, so they never trigger this path; see "Card collections" below), logs a plausible purchase (`#<random id>`), decrements `vault_eth`, increments `nfts_held`. Nothing is actually bought — there's no Seaport integration in this path.
+  - **Draw:** for `policy: raffle` coins, seeds the pick with a *real* recent Robinhood Chain block hash and picks a winner from *real* recent buyers (ERC20 `Transfer` logs from the coin's curve, last 5,000 blocks — `eth_getLogs` via the same RPC gateway `/api/rpc` uses). No buyers found yet → logged with `winner: null`, shown in the UI as "no buyers yet — winner pending", never silently dropped.
+  - The coin page's Vault panel always shows a "Simulated" badge and a one-line disclaimer. The "Run keeper now" button on the Vault activity panel only renders when `NODE_ENV !== 'production'` (local testing only — the real cron route is the only production trigger, gated by `CRON_SECRET`).
+- **Phase 2 (built + tested 2026-10, NOT deployed — real money, see `contracts/`):** a full 7-contract Solidity system that does what Vaul's own docs describe, deployed per-coin by one of two one-tx launchers:
+  - `ZeepVault.sol`: holds a coin's 80% vault share, Seaport-1.6-gated buy (checks the real canonical Seaport address, enforces a spend ceiling), never allows a raw withdraw, hands off to a raffle/burn outcome contract once it owns the NFT.
+  - `ZeepFeeRouter.sol`: set as a coin's Pons `creatorFeeRecipient`; anyone can call `harvest()`, which pulls the real claimable balance from Pons escrow and splits it 80/20 to the vault / ZEEP treasury. This is how the 80/20 split is enforced on-chain, not off-chain — confirmed against Vaul's docs.
+  - `ZeepRaffle.sol`: Merkle-proof ticket weighting (by token balance) + commit-reveal draw (commits to a block ~20 blocks in the future, draws from that block's hash within a 256-block window) so no one can see the outcome before committing. Also supports a `Burn` policy (`burnNow()`).
+  - `ZeepLauncher.sol`: one transaction — launches the Pons coin, deploys Vault+Router+Raffle, wires them together, hands ownership to `registryOwner`. Used for collections that live on Robinhood Chain itself.
+  - `ZeepExternalVault.sol` / `ZeepExternalRaffle.sol` / `ZeepExternalLauncher.sol`: the cross-chain variant, for collections that don't live on Robinhood Chain — which is all of them today, since Courtyard's Pokémon/One Piece cards are on **Polygon** (see "Card collections" below). Same economics, but withdrawal is Announce → wait 1 hour → Execute (to the keeper wallet, which then buys on the real chain) → `recordPurchase()`/`recordDelivery()` as an on-chain receipt of an off-chain action. The 1-hour delay plus owner-cancel exists so a compromised keeper key can be stopped before funds move.
+  - 28/28 Hardhat tests passing (`contracts/test/`), and a full local Ignition deploy verified working (`contracts/ignition/`). **Not audited, not deployed anywhere real, no keeper wallet funded.** See `contracts/README` equivalent below and do not deploy to Robinhood Chain mainnet or fund a keeper wallet without an explicit go-ahead — that's the line between "tested code" and "real funds at risk."
+  - The Next.js app does not call these contracts yet. Wiring `lib/server/keeper.ts` to call them for real (instead of simulating) is the next step once addresses exist from a real deploy.
+- Vercel Hobby plan caps cron jobs at once a day; the `0 6 * * *` schedule in `vercel.json` reflects that. On Pro, tighten it for faster demo cycles. Locally, use the "Run keeper now" button or `curl http://localhost:3471/api/cron/keeper` instead of waiting for cron.
+
+## Card collections (real data, verified 2026-10)
+
+Pokémon/One Piece cards are not on Robinhood Chain and not one-contract-per-set. They're tokenized by **Courtyard.io**, a real-world-asset vaulting platform: burn the NFT and Courtyard (custodied with Brink's) ships you the physical card. Verified directly on PolygonScan:
+
+- Chain: **Polygon** (not Ethereum — this was wrong until this pass)
+- Contract: `0x251BE3A17Af4892035C37ebf5890F4a4D889dcAD` — a single verified proxy, 850k+ transactions, holds *every* vaulted item Courtyard has (all sports/TCG lines), so "Pokémon" vs "One Piece" is a search/trait filter within one collection, not separate contracts
+- Pricing is **USD/USDC**, not ETH — see `lib/collections.ts`'s `searchFilter` field and the `COURTYARD` constant
+- This is why the external-vault/launcher contracts above exist, and why the Phase 1.5 simulated purchase step (ETH-floor-only) intentionally does nothing for these two collections — a real purchase here needs the cross-chain Announce/Execute/Record flow plus a USD→ETH conversion, which only the Phase 2 external contracts model.
+
+## Collections page + Grail Mode (2026-10, matching vaul.app/collections and vaul.app/cards)
+
+- `app/collections/page.tsx`: new page, lists the 438 pfp/art `lib/collections.ts` entries (every chain) in a searchable, category-filterable table — collection, chain, coins launched, ETH in vaults, NFTs held — the launch counts/totals computed client-side by joining `/api/tokens`' rows against `collection_slug`, same shape as Vaul's own `/collections` table. Each row links to `/launch?collection=<slug>` (the launch wizard reads that query param on mount and preselects the collection + its category + search text). The 4 `category: "cards"` entries are deliberately excluded from this page and its tab bar — "Cards ↗" there links out to `/cards` instead of filtering in place, since cards already have their own richer page (hero, stats, Grail Mode, coin grid).
+- `lib/collections.ts` was rewritten twice in this pass. First to replace 5 **placeholder Ethereum collections that don't exist on Robinhood Chain at all** (Pudgy Penguins, Milady Maker, etc.) with a curated real subset; then, per the owner's explicit ask to pull the full set, to **generate from `lib/data/robinhood-collections.json`** — a one-time fetch (2026-10) of a public, unauthenticated collection manifest covering every chain a ZEEP vault can realistically reach: Robinhood Chain itself (144 collections, native `ZeepVault`/`ZeepLauncher`) plus Ethereum, Base, Hyperliquid, Polygon and Solana (294 collections, need the cross-chain `ZeepExternalVault`/`ZeepExternalLauncher` path — see "Contracts workspace"). Every entry has a real contract/program address and a real OpenSea-hosted logo. `category` defaults to `"pfp"` (the source data doesn't label pfp vs art, and hand-categorizing 438 entries isn't practical); `floor` stays `"—"` — still no OpenSea API key for live floor prices (tracked below). The manifest's own 4 real `"cards"` entries are used directly for the card lines instead of hand-curating: 2 Courtyard (Polygon, same contract already verified on PolygonScan) and 2 **Collector Crypt** (Solana, program address `CCryptUfeFSZ3Fgc9FLeKrhLVAP67FSqi1GuVoj9CRac` — `COLLECTOR_CRYPT` in `lib/collections.ts`), each with the manifest's real search terms.
+- Deliberately **not** vendored from that same manifest: its ~4 `"grail"` entries (a vault saving for one specific named graded card, e.g. "Charizard PSA 10"). That's someone else's curated feature content, not "a collection that exists" the way the pfp/art/cards entries are — filtered out by `kind !== "grail"` in `lib/collections.ts`.
+- Both the launch wizard's collection picker (`app/launch/page.tsx`) and the new `/collections` page got a name-search input once the set grew to 438+ entries — the wizard's picker also caps the unfiltered view to the first 24 so it doesn't render hundreds of buttons by default. The wizard's picker still shows a plain color swatch, not real logos, keeping that flow's long-standing "no artwork anywhere in the picker" rule; `/collections` is the one place real collection logos are shown.
+- `app/page.tsx`'s hero card-stack illustration (`STACK`) was also still hardcoding "Pudgy Penguins"/"Milady Maker" after the `lib/collections.ts` rewrite — missed in the first pass, fixed to pull real names from `COLLECTIONS` too.
+- **Grail Mode**, shown on `/cards` as a clearly-marked "Coming soon" panel, not a working feature: instead of a vault buying the cheapest card in a category on every tick, a Grail Mode coin would save everything until it can afford one specific graded card from Collector Crypt, buy only that card, and raffle it once. This needs a vault policy ZEEP's contracts don't have yet (a "target one specific NFT/spec" ceiling instead of "cheapest meeting a floor") plus a live Solana marketplace price feed, so it's documented and designed for but intentionally not wired to fake data — consistent with how Phase 1.5/Phase 2 are labeled elsewhere in this file. Do not fabricate grail card listings or prices to make this look live; the real grail definitions exist (in the same source manifest, filtered out above) but are someone else's curated picks, not ZEEP's.
+
+## Contracts workspace (`contracts/`)
+
+Separate Hardhat 3 project (own `package.json`, ESM, ethers v6), not part of the Next.js build. `npx hardhat test` from `contracts/` to run all 28 tests. `npx hardhat ignition deploy ignition/modules/ZeepCore.ts --network <net> --parameters ignition/parameters/<file>.json` to deploy — never commit a real parameters file (only `robinhood.example.json`'s placeholder addresses and `local-test.json`'s well-known Hardhat test keys are tracked; copy to `robinhood.json`, gitignored, and fill in real addresses before a real deploy). `ZeepCore.ts` deploys only the two launchers; everything per-coin (Vault/Router/Raffle) is deployed by the launcher itself at launch time, not by Ignition.
+
+## Tech stack
+
+**Next.js 15 (App Router) + React 19 + TypeScript + Tailwind CSS**, shadcn-style conventions (`components.json`, `lib/utils.ts` `cn()`, CSS variables in `app/globals.css`). Migrated 2026-10 from a vanilla HTML/CSS/JS SPA (kept for reference in `legacy-vanilla/`, not deployed — see `.vercelignore`) specifically to use a shadcn `Sidebar` primitive (`components/ui/sidebar.tsx`, sourced from a 21st.dev-style component drop) for the left-nav layout. ethers.js v6 (npm). Supabase holds the coin registry (`zeep_coins`); everything else reads from chain. Deployed on Vercel.
+
+**Wallet connect is Privy** (`@privy-io/react-auth`, 2026-10 — replaced the earlier EIP-6963 raw-discovery implementation). `components/providers/privy-app-provider.tsx` wraps the app in `<PrivyProvider>` (wallet + email login, embedded wallet auto-created for email-only users, scoped to Robinhood Chain via `lib/privyChain.ts`'s viem `Chain`). `components/providers/wallet-bridge.tsx` is a client component mounted inside that provider which reads Privy's `usePrivy()`/`useWallets()` hooks and pushes the result into `lib/wallet.ts`'s plain `EventTarget` singleton — kept as a singleton (not a hook) specifically because `lib/chain.ts`'s `buy`/`sell`/`launch` need to grab a signer from plain async functions outside the React tree, which Privy's hooks can't do directly. `components/wallet-dialog.tsx`'s "connect" button now just calls `wallet.connect()`, which opens Privy's own modal (wallet list + email) — ZEEP no longer renders its own wallet picker. Needs `NEXT_PUBLIC_PRIVY_APP_ID` (see "Environment variables"); without it, `PrivyAppProvider` renders children with wallet connect simply unavailable rather than crashing.
+
+Extra runtime deps pulled in specifically for the sidebar component: `framer-motion` (collapse/active-pill animation), `@base-ui/react` (`useRender` for `asChild` composition), `@tabler/icons-react`, `clsx` + `tailwind-merge`.
+
+**Home hero is a ported 21st.dev "hero-10" block** (`components/ui/hero-10.tsx`, 2026-10). Adapted on the way in, not pasted verbatim: `motion/react` → `framer-motion` (already a dependency; same API, avoids a second animation library), the Tailwind v4 bare-fraction `aspect-4/5` → v3's `aspect-[4/5]` (this project is on Tailwind v3), and the hardcoded `font-serif` title → `font-display` (ZEEP's real headline token — Space Grotesk, not a generic serif). Needs `react-wrap-balancer` (new dependency, just for heading/paragraph line-balancing). The block also references a `components/ui/hero-10-utils/cta.tsx` helper that the drop doesn't actually ship — reconstructed from how `Hero10` calls it (`components/ui/button.tsx` + `next/link`). `components/ui/button.tsx` is a new shadcn-style `Button` primitive, first one in this project — composed via Base UI's `useRender` for `asChild`, **not** Radix's `Slot`, matching the precedent `components/ui/sidebar.tsx` already set (its own comment: "asChild composition migrated from Radix Slot to Base UI's useRender") rather than reintroducing the dependency this project deliberately moved away from. Shape (pill, 44px touch targets) matches every hand-written button elsewhere in the app rather than shadcn's stock `rounded-md`. The hero's 3 fanned images are real OpenSea-hosted collection logos (same ones in `app/page.tsx`'s old card-stack and on `/collections`), not stock photography — consistent with "no fabricated art" elsewhere in this file.
+
+## Files
+
+- `app/layout.tsx`: root shell — `AppSidebar` + `Topbar` (mobile) + page content + `SiteFooter` + `WalletDialog`, wrapped in `ToastProvider`
+- `app/globals.css`: design tokens as CSS variables (shadcn-style names: `--background`, `--primary`, etc., plus `--primitive-*` overrides consumed by `components/ui/sidebar.tsx`)
+- `app/page.tsx`, `app/explore/page.tsx`, `app/cards/page.tsx`, `app/collections/page.tsx`, `app/launch/page.tsx`, `app/coin/[address]/page.tsx`: the six pages, all client components (`"use client"`) since they fetch the registry and hold wallet/form state
+- `components/ui/sidebar.tsx`: the pasted primitive, unmodified — `Sidebar`, `SidebarHeader`, `SidebarNav`, `SidebarSection`, `SidebarItem`, `SidebarNested`, `SidebarFooter`, `SidebarToggle`, `useSidebar()`
+- `components/app-sidebar.tsx`: ZEEP's nav built on the primitive — desktop: persistent `variant="default"`; mobile: the same `<Sidebar>` wrapped in a fixed+translate container toggled by `lib/mobileSidebarStore.ts`, shown via `components/topbar.tsx`'s hamburger
+- `components/topbar.tsx`: mobile-only top bar (hamburger + brand + wallet button), hidden ≥`md`
+- `components/wallet-dialog.tsx`, `components/coin-card.tsx`, `components/site-footer.tsx`
+- `lib/config.ts`: chain + Pons addresses/ABI (same Robinhood Chain deployment as MONETA), vault economics constants
+- `lib/collections.ts` + `lib/data/robinhood-collections.json`: the real, full collection set (442 entries) for the launch wizard and Card Vaults/Collections pages — see "Collections page + Grail Mode"
+- `lib/wallet.ts` + `lib/useWallet.ts`: wallet singleton (framework-agnostic class, backed by Privy — see "Tech stack") exposed as a hook via `useSyncExternalStore`
+- `components/providers/privy-app-provider.tsx` + `components/providers/wallet-bridge.tsx`: Privy setup and the bridge into `lib/wallet.ts`
+- `lib/privyChain.ts`: Robinhood Chain as a viem `Chain`, for Privy's config
+- `lib/chain.ts`: Pons reads/writes (launch, buy, sell, quotes)
+- `lib/api.ts`: typed calls to `/api/tokens`, `/api/register`, `/api/vault-events`, `/api/cron/keeper` (dev-only manual trigger)
+- `lib/format.ts`: `short`, `fmtEth`, `fmtInt`, `timeAgo`, `policyLabel`
+- `lib/toast.tsx`, `lib/walletDialogStore.ts`, `lib/mobileSidebarStore.ts`: small pub-sub stores for cross-tree UI state, same pattern as `wallet.ts`
+- `app/api/tokens/route.ts`: registry list + totals (`list=new|top|nfts`, `search=`, `token=`)
+- `app/api/register/route.ts`: verifies a Pons launch tx on chain (salt tag `ZEEP`) and stores the coin + chosen vault policy
+- `app/api/rpc/route.ts`: read-only JSON-RPC gateway (allow-listed methods only)
+- `app/api/vault-events/route.ts`: vault event log for one coin (`?token=0x...`), read by the coin page's "Vault activity" panel
+- `app/api/cron/keeper/route.ts`: runs `lib/server/keeper.ts` once; scheduled by `vercel.json`, gated by `CRON_SECRET` in production
+- `lib/server/`: `store.ts` (Supabase or local `.data/` registry + vault events, file mode whenever `NODE_ENV !== 'production'`), `rpc.ts` (RPC failover), `pons.ts` (factory/router/escrow addresses + ABIs), `limit.ts` (per-IP rate limit), `keeper.ts` (the simulated harvest/purchase/draw logic — see "Vault execution" above)
+- `supabase/schema.sql`: `zeep_coins` + `zeep_vault_events` tables, RLS on, no public policies
+
+## Environment variables (Vercel)
+
+`SUPABASE_URL` + `SUPABASE_SERVICE_KEY` (registry; without them in production, `/api/tokens` returns an empty list and `/api/register` returns 503). `CRON_SECRET` (any random string — protects `/api/cron/keeper` in production; Vercel Cron sends it automatically once set). `NEXT_PUBLIC_PRIVY_APP_ID` (from the Privy dashboard — without it, wallet connect is simply disabled, the rest of the site still works). Optional `RPC_URL` (Alchemy). Never commit real values — see `.env.example`.
+
+## Dev
+
+No Supabase keys needed locally — the registry falls back to `.data/zeep-coins.json` (git-ignored) automatically in dev mode.
+
+Two launch configs, both in `../.claude/launch.json` (shared across the owner's projects), picked for different reasons:
+- **`zeep`** → http://localhost:3471, runs `npm run preview` (`next build && next start`). **This is the default** — Next's dev server (`next dev`) compiles each route on first visit, which took 7–12s per route on this machine once Privy/framer-motion/the full collections dataset were added, and repeatedly read as "the site is heavy" even though the production bundle itself is normal-sized (105 kB shared, 118–256 kB per route) and fast once built (sub-500ms navigations). `zeep` gives a true-to-production, fast-every-time preview at the cost of a ~30–60s rebuild each time it's (re)started.
+- **`zeep-dev`** → http://localhost:3473, runs `next dev -p 3473` with Fast Refresh. Use this one instead of `zeep` only while actively iterating on code in this session — it avoids a full rebuild per edit. Switch back to restarting `zeep` (which rebuilds) before telling the owner to look at something, since they test against port 3471.
+
+Don't run `npm run build` in the same `.next` directory while `next dev` is also running against it (on either port) — the dev server's module cache gets corrupted (`__webpack_modules__[moduleId] is not a function`); if that happens, stop whichever dev server is running, `rm -rf .next`, and restart.
+
+## Working rules (from the project owner)
+
+- **Git identity:** GitHub account `Mickiyugods`, commit email `primaanggara2r@gmail.com` (same as the owner's other projects).
+- **Never** add `Co-Authored-By: Claude` or any AI attribution to commits or PRs.
+- **Squash** all commits into one before pushing.
+- After visual changes, check **mobile, tablet and desktop** yourself and fix issues before reporting.
+- Be fast: act directly, keep replies short, no unrequested extras. The owner writes in Indonesian; reply in Indonesian.

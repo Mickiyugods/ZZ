@@ -1,0 +1,10 @@
+{
+  "ZeepCore": {
+    "ponsFactory": "0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e",
+    "escrow": "0xd3AFEB2a57f70eF218Aa82451c51B2fb0416Ac9e",
+    "seaport": "0x0000000000000068F116a894984e2DB1123eB395",
+    "treasury": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+    "registryOwner": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+    "keeper": "0x90F79bf6EB2c4f870365E785982E1f101E93b906"
+  }
+}
