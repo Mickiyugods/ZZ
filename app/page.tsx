@@ -24,15 +24,18 @@ const MECH: [string, string][] = [
   ["ADMIN KEYS", "none on the vault"],
 ];
 
-// Real Robinhood Chain collection logos (see /collections for the full real
+// Real, recognizable NFT collections (see /collections for the full real
 // list — not imported here: it's 400+ entries and this only ever needs 3).
 // Hardcoded, not fabricated: the same OpenSea-hosted logos shown there.
+// These three are on Ethereum, so pairing a coin with them routes through
+// the cross-chain External Vault/Launcher, not the native Robinhood one —
+// see CLAUDE.md "Contracts workspace".
 const HERO_IMAGES = [
-  "https://i2c.seadn.io/collection/rh-machines-575117439/image_type_logo/213d4a3a5d1f05a817c91bebbe0788/76213d4a3a5d1f05a817c91bebbe0788.png",
-  "https://i2c.seadn.io/collection/cashcatss/image_type_logo/85d404f808ab106f13790b69054c3f/a185d404f808ab106f13790b69054c3f.png",
-  "https://i2c.seadn.io/collection/stonkbrokers-434284142/image_type_logo/d2dfd6700b856a0efa032fe803488f/96d2dfd6700b856a0efa032fe803488f.png",
+  "https://i2c.seadn.io/collection/boredapeyachtclub/image/1a09c26b1c30427b26944c47fc7bb9/d81a09c26b1c30427b26944c47fc7bb9.png",
+  "https://i2c.seadn.io/collection/pudgypenguins/image/f489fb69fd11886b468c0f7ff1376c/cdf489fb69fd11886b468c0f7ff1376c.png",
+  "https://i2c.seadn.io/collection/milady/image/d4499e2e55f5e85ead4b0eb7f7dad7/90d4499e2e55f5e85ead4b0eb7f7dad7.jpeg",
 ];
-const HERO_IMAGE_ALTS = ["RH MACHINES", "Cash Cats", "StonkBrokers"];
+const HERO_IMAGE_ALTS = ["Bored Ape Yacht Club", "Pudgy Penguins", "Milady Maker"];
 
 export default function HomePage() {
   const [totals, setTotals] = React.useState<{ coins: number; vaultEth: number; nftsHeld: number } | null>(null);

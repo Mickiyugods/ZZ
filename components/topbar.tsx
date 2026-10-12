@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
-import { IconMenu2 } from "@tabler/icons-react";
+import { BaselineDensityMediumIcon } from "@/components/icons/baseline-density-medium";
 import { mobileSidebarStore } from "@/lib/mobileSidebarStore";
 import { useWallet } from "@/lib/useWallet";
 import { openWallet } from "@/lib/walletDialogStore";
@@ -33,7 +33,7 @@ export function Topbar() {
         onClick={() => mobileSidebarStore.toggle()}
         className={cn("flex size-11 shrink-0 items-center justify-center rounded-[var(--primitive-radius-control-sm,0.5rem)] border border-[var(--border)]", focusRing)}
       >
-        <IconMenu2 className="size-[18px]" stroke={1.75} />
+        <BaselineDensityMediumIcon size={18} />
       </button>
       <Link href="/" className={cn("flex items-center gap-2 rounded-[var(--primitive-radius-control-sm,0.5rem)] font-display text-[17px] font-bold", focusRing)}>
         <span className="flex size-8 items-center justify-center rounded-[9px] bg-gradient-to-br from-[var(--primary)] to-[#9fcb2a] text-[16px] font-bold text-[var(--primary-foreground)]">
