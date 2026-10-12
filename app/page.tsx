@@ -119,7 +119,7 @@ export default function HomePage() {
             Every launch is bound to these rules on day one. Nothing here can change after the coin ships.
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--border)] lg:grid-cols-5">
           {MECH.map(([k, v]) => (
             <div key={k} className="bg-[var(--background)] px-4 py-[18px]">
               <div className="text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">{k}</div>

@@ -61,18 +61,20 @@ export default function CardVaultsPage() {
         </div>
       </section>
 
-      <section className="mx-auto mb-2 mt-8 grid max-w-[1180px] grid-cols-2 gap-px overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--border)] px-6 sm:grid-cols-4">
-        {[
-          ["Card vaults", rows ? fmtInt(rows.length) : "—"],
-          ["ETH in vaults", totals ? fmtEth(totals.vault) : "—"],
-          ["Cards held", totals ? fmtInt(totals.nfts) : "—"],
-          ["Fees awaiting", totals ? `${fmtEth(totals.fees)} ETH` : "—"],
-        ].map(([label, value]) => (
-          <div key={label} className="bg-[var(--background)] px-5 py-4">
-            <div className="text-[11px] uppercase tracking-wider text-[var(--muted-foreground)]">{label}</div>
-            <div className="mt-1 font-mono-tabular text-[20px]">{value}</div>
-          </div>
-        ))}
+      <section className="mx-auto mb-2 mt-8 max-w-[1180px] px-6">
+        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-4">
+          {[
+            ["Card vaults", rows ? fmtInt(rows.length) : "—"],
+            ["ETH in vaults", totals ? fmtEth(totals.vault) : "—"],
+            ["Cards held", totals ? fmtInt(totals.nfts) : "—"],
+            ["Fees awaiting", totals ? `${fmtEth(totals.fees)} ETH` : "—"],
+          ].map(([label, value]) => (
+            <div key={label} className="bg-[var(--background)] px-5 py-4">
+              <div className="text-[11px] uppercase tracking-wider text-[var(--muted-foreground)]">{label}</div>
+              <div className="mt-1 font-mono-tabular text-[20px]">{value}</div>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="mx-auto max-w-[1180px] px-6 py-10">
