@@ -71,10 +71,10 @@ export default function HomePage() {
   return (
     <>
       <Hero10
-        title="Trade a coin."
-        titleLine2Prefix="Fund a"
+        title="Every trade"
+        titleLine2Prefix="feeds the"
         titleHighlight="vault."
-        description="Launch a coin on Robinhood Chain and link it to a real NFT collection. Most of every trading fee streams straight into an on-chain vault that can only buy that collection's cheapest piece — then raffles it, holds it, or burns it, exactly as set at launch."
+        description="Pick an NFT collection and a payout rule when you launch — raffle, hold, or burn. From that point on, a share of every trade routes on-chain into that collection's vault automatically. No admin key can touch it and no one can change the rule once the coin is live."
         socialProof={
           totals
             ? `${fmtInt(totals.coins)} coins live · ${fmtEth(totals.vaultEth)} ETH working in vaults`
