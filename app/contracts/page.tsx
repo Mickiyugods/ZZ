@@ -102,7 +102,7 @@ export default function ContractsPage() {
       <div className="mt-10">
         <h2 className="text-[20px]">ZEEP's reserve contracts</h2>
         <p className="mt-1.5 text-[14px] text-[var(--muted-foreground)]">
-          Built and tested (28/28 passing) — not audited, not deployed anywhere real, no keeper wallet funded. Every coin's
+          Built and tested (32/32 passing) — not audited, not deployed anywhere real, no keeper wallet funded. Every coin's
           Vault, FeeRouter and Raffle are deployed fresh per launch by one of the two launchers below, so there's no single
           standing address to show even once this ships. Until then, the site runs the Phase 1.5 simulation described in{" "}
           <Link href="/docs" className="text-[var(--primary)] hover:underline">
