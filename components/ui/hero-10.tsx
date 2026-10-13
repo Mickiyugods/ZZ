@@ -21,12 +21,18 @@ export interface Hero10Props {
   titleHighlight?: string;
   description: string;
   socialProof?: string;
-  images: string[];
+  images?: string[];
   imageAlts?: string[];
+  /** Custom media (e.g. a bespoke showcase) in place of the default 3-image fan. */
+  mediaSlot?: React.ReactNode;
   animation?: "none" | "subtle";
   primaryCTA: CtaProps;
   secondaryCTA?: CtaProps;
   variant?: "standard" | "compact";
+  /** "stack": centered, media below text (original layout). "split": text
+   * left / media right on large screens, media drops below text on smaller
+   * ones — used for a compact side-by-side showcase. */
+  layout?: "stack" | "split";
 }
 
 const variantStyles = {
@@ -171,10 +177,12 @@ export function Hero10({
   socialProof,
   images,
   imageAlts,
+  mediaSlot,
   animation = "none",
   primaryCTA,
   secondaryCTA,
   variant = "standard",
+  layout = "stack",
 }: Readonly<Hero10Props>) {
   const reduce = useReducedMotion();
   const animate = animation === "subtle" && !reduce;
@@ -210,9 +218,37 @@ export function Hero10({
 
   const socialProofElement = socialProof && <p className="text-xs font-medium text-muted-foreground">{socialProof}</p>;
 
-  const mediaElement = images?.length ? (
-    <ImageFan images={images} imageAlts={imageAlts} cardAspect={vs.fanCard} animate={animate} />
-  ) : null;
+  const mediaElement =
+    mediaSlot ?? (images?.length ? <ImageFan images={images} imageAlts={imageAlts} cardAspect={vs.fanCard} animate={animate} /> : null);
+
+  if (layout === "split") {
+    return (
+      <section className="relative isolate w-full overflow-hidden bg-background">
+        <motion.div
+          className={cn("relative z-10 mx-auto flex max-w-6xl flex-col items-center gap-10 px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-8", vs.section)}
+          variants={animate ? container : undefined}
+          initial={animate ? "hidden" : false}
+          whileInView={animate ? "visible" : undefined}
+          viewport={{ once: true, margin: "-80px" }}
+        >
+          <div className={cn("flex w-full max-w-2xl flex-col items-center text-center lg:items-start lg:text-left", vs.content)}>
+            <Reveal active={animate} className={cn("flex w-full flex-col items-center lg:items-start", vs.header)}>
+              {titleElement}
+              {descriptionElement}
+            </Reveal>
+            <Reveal active={animate} className="flex flex-col items-center gap-4 lg:items-start">
+              {ctasElement}
+              {socialProofElement}
+            </Reveal>
+          </div>
+
+          {mediaElement && (
+            <div className="flex w-full justify-center lg:w-auto lg:shrink-0 lg:justify-end">{mediaElement}</div>
+          )}
+        </motion.div>
+      </section>
+    );
+  }
 
   return (
     <section className="relative isolate w-full overflow-hidden bg-background">
