@@ -90,15 +90,15 @@ export default function HomePage() {
       />
 
       <section className="mx-auto max-w-[1180px] px-6 pb-10">
-        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-[var(--radius)] border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.14)] sm:grid-cols-3">
           {[
             ["Coins launched", totals ? fmtInt(totals.coins) : "—"],
             ["NFTs collected", totals ? fmtInt(totals.nftsHeld) : "—"],
             ["ETH in reserves", totals ? fmtEth(totals.vaultEth) : "—"],
           ].map(([label, value]) => (
             <div key={label} className="bg-[var(--background)] px-6 py-[22px]">
-              <div className="font-mono-tabular text-[30px] font-semibold text-[var(--primary)]">{value}</div>
-              <div className="mt-1 text-[12px] uppercase tracking-wider text-[var(--muted-foreground)]">{label}</div>
+              <div className="font-mono-tabular text-[32px] font-bold leading-none tracking-tight text-[var(--primary)]">{value}</div>
+              <div className="mt-2 text-[12px] font-medium uppercase tracking-wider text-[var(--muted-foreground)]">{label}</div>
             </div>
           ))}
         </div>
