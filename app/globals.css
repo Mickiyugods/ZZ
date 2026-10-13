@@ -36,7 +36,7 @@
 
   /* --primitive-* overrides consumed by components/ui/sidebar.tsx */
   --primitive-surface-selected: color-mix(in srgb, var(--primary) 12%, transparent);
-  --primitive-surface-hover: color-mix(in srgb, var(--foreground) 5%, transparent);
+  --primitive-surface-hover: color-mix(in srgb, var(--foreground) 9%, transparent);
   --primitive-text-secondary: var(--muted-foreground);
   --primitive-ring: var(--primary);
   --primitive-radius-item: 0.625rem;

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSyncExternalStore } from "react";
@@ -130,6 +131,71 @@ function CtaWrap({ children }: { children: React.ReactNode }) {
   return <div className={cn("flex flex-col gap-2 pb-2", collapsed ? "items-center px-2" : "px-[18px]")}>{children}</div>;
 }
 
+// Shorter than OPEN_DELAY (110ms, below) — the rail itself expands and
+// reveals the real label on hover, so the tooltip only has a brief window
+// to be useful; it needs to beat that expansion to be seen at all.
+const TOOLTIP_SHOW_DELAY = 40;
+
+// Styled replacement for the native title-attribute tooltip the collapsed
+// rail used to rely on (slow to appear — browsers wait ~700ms before
+// showing a native title tooltip, well past the point the rail has already
+// expanded — and inconsistent styling across browsers). Rendered via portal
+// since SidebarNav clips overflow-x to keep the rail from widening, which
+// would otherwise clip a tooltip extending past it.
+function NavTooltip({ label, anchorRef, show }: { label: string; anchorRef: React.RefObject<HTMLElement | null>; show: boolean }) {
+  const [pos, setPos] = React.useState<{ top: number; left: number } | null>(null);
+
+  React.useLayoutEffect(() => {
+    if (!show || !anchorRef.current) {
+      setPos(null);
+      return;
+    }
+    const r = anchorRef.current.getBoundingClientRect();
+    setPos({ top: r.top + r.height / 2, left: r.right + 10 });
+  }, [show, anchorRef]);
+
+  if (!show || !pos || typeof document === "undefined") return null;
+
+  return createPortal(
+    <span
+      role="tooltip"
+      style={{ position: "fixed", top: pos.top, left: pos.left, transform: "translateY(-50%)" }}
+      className="pointer-events-none z-[200] whitespace-nowrap rounded-[var(--primitive-radius-control-sm,0.5rem)] border border-[var(--border)] bg-[var(--card)] px-2.5 py-1.5 text-[12px] font-medium text-[var(--foreground)] shadow-[0_4px_16px_rgba(0,0,0,0.5)]"
+    >
+      {label}
+    </span>,
+    document.body,
+  );
+}
+
+function NavLink({ item, active, onClick }: { item: (typeof NAV)[number]; active: boolean; onClick: (e: React.MouseEvent) => void }) {
+  const { collapsed } = useSidebar();
+  const anchorRef = React.useRef<HTMLDivElement>(null);
+  const [showTooltip, setShowTooltip] = React.useState(false);
+  const showTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const onEnter = React.useCallback(() => {
+    if (!collapsed) return;
+    showTimer.current = setTimeout(() => setShowTooltip(true), TOOLTIP_SHOW_DELAY);
+  }, [collapsed]);
+  const onLeave = React.useCallback(() => {
+    if (showTimer.current) clearTimeout(showTimer.current);
+    setShowTooltip(false);
+  }, []);
+  React.useEffect(() => () => {
+    if (showTimer.current) clearTimeout(showTimer.current);
+  }, []);
+
+  return (
+    <div ref={anchorRef} onMouseEnter={onEnter} onMouseLeave={onLeave} onFocus={onEnter} onBlur={onLeave}>
+      <SidebarItem href={item.href} icon={<item.icon className="size-[18px]" stroke={1.75} />} active={active} onClick={onClick} className="min-h-11">
+        {item.label}
+      </SidebarItem>
+      <NavTooltip label={item.label} anchorRef={anchorRef} show={collapsed && showTooltip} />
+    </div>
+  );
+}
+
 function useNavClick(router: ReturnType<typeof useRouter>) {
   return React.useCallback(
     (href: string) => (e: React.MouseEvent) => {
@@ -201,16 +267,12 @@ export function AppSidebar() {
   const navItems = (
     <SidebarSection>
       {NAV.map((item) => (
-        <SidebarItem
+        <NavLink
           key={item.href}
-          href={item.href}
-          icon={<item.icon className="size-[18px]" stroke={1.75} />}
+          item={item}
           active={item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)}
           onClick={navClick(item.href)}
-          className="min-h-11"
-        >
-          {item.label}
-        </SidebarItem>
+        />
       ))}
     </SidebarSection>
   );
