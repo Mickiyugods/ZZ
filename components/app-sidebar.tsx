@@ -42,6 +42,9 @@ interface NavItemDef {
   icon: React.ComponentType<{ className?: string; stroke?: number }>;
 }
 
+const LAUNCH_ITEM: NavItemDef = { href: "/launch", label: "Launch", icon: IconRocket };
+const PROFILE_ITEM: NavItemDef = { href: "/profile", label: "Profile", icon: IconUser };
+
 const TOP_NAV: NavItemDef[] = [
   { href: "/", label: "Home", icon: IconHome2 },
   { href: "/explore", label: "Explore", icon: IconCompass },
@@ -50,11 +53,6 @@ const TOP_NAV: NavItemDef[] = [
 const COLLECTIONS_GROUP: NavItemDef[] = [
   { href: "/cards", label: "Card Collections", icon: IconCards },
   { href: "/collections", label: "NFT Collections", icon: IconLayoutGrid },
-];
-
-const BOTTOM_NAV: NavItemDef[] = [
-  { href: "/launch", label: "Launch", icon: IconRocket },
-  { href: "/profile", label: "Profile", icon: IconUser },
 ];
 
 const RESOURCES_GROUP: NavItemDef[] = [
@@ -342,6 +340,8 @@ export function AppSidebar() {
 
   const navItems = (
     <SidebarSection>
+      <NavLink item={LAUNCH_ITEM} active={isActive(LAUNCH_ITEM.href)} onClick={navClick(LAUNCH_ITEM.href)} />
+
       {TOP_NAV.map((item) => (
         <NavLink key={item.href} item={item} active={isActive(item.href)} onClick={navClick(item.href)} />
       ))}
@@ -361,10 +361,6 @@ export function AppSidebar() {
         ))}
       </NavGroup>
 
-      {BOTTOM_NAV.map((item) => (
-        <NavLink key={item.href} item={item} active={isActive(item.href)} onClick={navClick(item.href)} />
-      ))}
-
       <NavGroup label="Resources" icon={IconLifebuoy} defaultOpen={resourcesActive} active={resourcesActive}>
         {RESOURCES_GROUP.map((item) => (
           <SidebarItem
@@ -379,6 +375,8 @@ export function AppSidebar() {
           </SidebarItem>
         ))}
       </NavGroup>
+
+      <NavLink item={PROFILE_ITEM} active={isActive(PROFILE_ITEM.href)} onClick={navClick(PROFILE_ITEM.href)} />
     </SidebarSection>
   );
 
