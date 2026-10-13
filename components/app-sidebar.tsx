@@ -6,19 +6,21 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSyncExternalStore } from "react";
 import {
-  IconHome2,
-  IconCompass,
-  IconCards,
-  IconRocket,
   IconWallet,
-  IconLayoutGrid,
-  IconUser,
-  IconFolders,
   IconLifebuoy,
   IconBook2,
   IconFileCode2,
   IconHelpCircle,
 } from "@tabler/icons-react";
+import {
+  HomeIcon,
+  ExploreIcon,
+  FoldersIcon,
+  CardStackIcon,
+  NftCardIcon,
+  RocketIcon,
+  ProfileIcon,
+} from "@/components/icons/zeep-icons";
 import {
   Sidebar,
   SidebarHeader,
@@ -42,17 +44,17 @@ interface NavItemDef {
   icon: React.ComponentType<{ className?: string; stroke?: number }>;
 }
 
-const LAUNCH_ITEM: NavItemDef = { href: "/launch", label: "Launch", icon: IconRocket };
-const PROFILE_ITEM: NavItemDef = { href: "/profile", label: "Profile", icon: IconUser };
+const LAUNCH_ITEM: NavItemDef = { href: "/launch", label: "Launch", icon: RocketIcon };
+const PROFILE_ITEM: NavItemDef = { href: "/profile", label: "Profile", icon: ProfileIcon };
 
 const TOP_NAV: NavItemDef[] = [
-  { href: "/", label: "Home", icon: IconHome2 },
-  { href: "/explore", label: "Explore", icon: IconCompass },
+  { href: "/", label: "Home", icon: HomeIcon },
+  { href: "/explore", label: "Explore", icon: ExploreIcon },
 ];
 
 const COLLECTIONS_GROUP: NavItemDef[] = [
-  { href: "/cards", label: "Card Collections", icon: IconCards },
-  { href: "/collections", label: "NFT Collections", icon: IconLayoutGrid },
+  { href: "/cards", label: "Card Collections", icon: CardStackIcon },
+  { href: "/collections", label: "NFT Collections", icon: NftCardIcon },
 ];
 
 const RESOURCES_GROUP: NavItemDef[] = [
@@ -151,7 +153,7 @@ function LaunchCta() {
         title="Launch a coin"
         className={cn("flex size-11 items-center justify-center self-center rounded-full bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[#e5e5e5]", focusRing)}
       >
-        <IconRocket className="size-[18px]" stroke={1.75} />
+        <RocketIcon className="size-[18px]" stroke={1.75} />
       </Link>
     );
   }
@@ -372,7 +374,7 @@ export function AppSidebar() {
 
       <NavGroup
         label="My Collections"
-        icon={IconFolders}
+        icon={FoldersIcon}
         open={openGroup === "collections"}
         onOpenChange={(next) => setOpenGroup(next ? "collections" : null)}
         active={collectionsActive}
