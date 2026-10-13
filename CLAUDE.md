@@ -116,4 +116,5 @@ Don't run `npm run build` in the same `.next` directory while `next dev` is also
 - **Never** add `Co-Authored-By: Claude` or any AI attribution to commits or PRs.
 - **Squash** all commits into one before pushing.
 - After visual changes, check **mobile, tablet and desktop** yourself and fix issues before reporting.
+- **Keep this file in sync.** Any change that adds/removes a page, route, env var, dependency, or alters the design direction (palette, layout, nav structure) must update the relevant section of this file in the same commit — don't let CLAUDE.md drift from the real codebase, since every new session (including Cowork) reads it first for context.
 - Be fast: act directly, keep replies short, no unrequested extras. The owner writes in Indonesian; reply in Indonesian.
