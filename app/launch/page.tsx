@@ -28,7 +28,7 @@ const CATS: [Category, string][] = [
   ["art", "Art"],
   ["cards", "Cards"],
 ];
-const POLICY_LABEL: Record<string, string> = { raffle: "Raffle to holders", hold: "Hold in vault", burn: "Burn" };
+const POLICY_LABEL: Record<string, string> = { raffle: "Raffle to holders", hold: "Hold in reserve", burn: "Burn" };
 
 type Policy = "raffle" | "hold" | "burn";
 
@@ -81,7 +81,7 @@ export default function LaunchPage() {
         { name, symbol, logo, description, twitter, website, creatorTaxBps },
         (s) => setLaunchStatus({ prepare: "Preparing…", sign: "Confirm in wallet…", confirm: "Waiting for confirmation…" }[s] || "Working…"),
       );
-      setLaunchStatus("Registering vault…");
+      setLaunchStatus("Registering reserve…");
       await registerCoin({
         hash: result.hash,
         collectionName,
@@ -103,7 +103,7 @@ export default function LaunchPage() {
     <section className="mx-auto max-w-[760px] px-6 pb-20 pt-12">
       <h1 className="text-[38px]">Launch a coin</h1>
       <p className="mt-2.5 text-[var(--muted-foreground)]">
-        Create a Pons coin on Robinhood Chain whose trading fees fund a vault. Fill in four short steps, then confirm one
+        Create a Pons coin on Robinhood Chain whose trading fees fund a reserve. Fill in four short steps, then confirm one
         transaction.
       </p>
 
@@ -226,7 +226,7 @@ export default function LaunchPage() {
 
         {step === 2 && (
           <div className="flex flex-col gap-5">
-            <Field label="What happens to what the vault buys">
+            <Field label="What happens to what the reserve buys">
               <div className="flex flex-wrap gap-2">
                 {(["raffle", "hold", "burn"] as Policy[]).map((p) => (
                   <Pill key={p} active={policy === p} onClick={() => setPolicy(p)}>
@@ -303,10 +303,10 @@ export default function LaunchPage() {
           <span style={{ width: `${VAULT.vaultBps / 100}%` }} className="h-full bg-[var(--primary)]" />
           <span style={{ width: `${VAULT.protocolBps / 100}%` }} className="h-full bg-[var(--muted-foreground)]" />
         </div>
-        <Row label="Collection vault" value={`${(VAULT.vaultBps / 10000).toFixed(2)} ETH`} />
+        <Row label="Collection reserve" value={`${(VAULT.vaultBps / 10000).toFixed(2)} ETH`} />
         <Row label="ZEEP treasury" value={`${(VAULT.protocolBps / 10000).toFixed(2)} ETH`} />
         <p className="mt-2.5 text-[12px] text-[var(--muted-foreground)]">
-          Pons charges its own trade fee and passes a share to the fee router. The router sends 80% to the vault, 20% to the
+          Pons charges its own trade fee and passes a share to the fee router. The router sends 80% to the reserve, 20% to the
           treasury. Gas and any Pons launch-block tax are not included.
         </p>
       </div>

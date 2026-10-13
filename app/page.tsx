@@ -14,7 +14,7 @@ const focusRing =
 
 const MECH: [string, string][] = [
   ["PAIRING", "locked at launch"],
-  ["FEE SPLIT", "80% vault / 20% protocol"],
+  ["FEE SPLIT", "80% reserve / 20% protocol"],
   ["SPEND CAP", "price ≤ posted ceiling"],
   ["CEILING TTL", "expires in 1 hour"],
   ["MARKETPLACE", "Seaport 1.6 only"],
@@ -22,7 +22,7 @@ const MECH: [string, string][] = [
   ["HARVEST", "callable by anyone"],
   ["DRAW SOURCE", "future block hash"],
   ["OUTCOME", "raffle, hold or burn"],
-  ["ADMIN KEYS", "none on the vault"],
+  ["ADMIN KEYS", "none on the reserve"],
 ];
 
 // Real, recognizable NFT collections (see /collections for the full real
@@ -46,7 +46,7 @@ export default function HomePage() {
   const [myTotals, setMyTotals] = React.useState<{ coins: number; vaultEth: number } | null>(null);
 
   React.useEffect(() => {
-    document.title = "ZEEP — memecoins with a vault inside";
+    document.title = "ZEEP — memecoins with a reserve inside";
   }, []);
 
   React.useEffect(() => {
@@ -73,11 +73,11 @@ export default function HomePage() {
       <Hero10
         title="Every trade"
         titleLine2Prefix="feeds the"
-        titleHighlight="vault."
-        description="Pick an NFT collection and a payout rule when you launch — raffle, hold, or burn. From that point on, a share of every trade routes on-chain into that collection's vault automatically. No admin key can touch it and no one can change the rule once the coin is live."
+        titleHighlight="reserve."
+        description="Pick an NFT collection and a payout rule when you launch — raffle, hold, or burn. From that point on, a share of every trade routes on-chain into that collection's reserve automatically. No admin key can touch it and no one can change the rule once the coin is live."
         socialProof={
           totals
-            ? `${fmtInt(totals.coins)} coins live · ${fmtEth(totals.vaultEth)} ETH working in vaults`
+            ? `${fmtInt(totals.coins)} coins live · ${fmtEth(totals.vaultEth)} ETH working in reserves`
             : error
               ? "Live totals unavailable right now."
               : "Loading live totals…"
@@ -94,7 +94,7 @@ export default function HomePage() {
           {[
             ["Coins launched", totals ? fmtInt(totals.coins) : "—"],
             ["NFTs collected", totals ? fmtInt(totals.nftsHeld) : "—"],
-            ["ETH in vaults", totals ? fmtEth(totals.vaultEth) : "—"],
+            ["ETH in reserves", totals ? fmtEth(totals.vaultEth) : "—"],
           ].map(([label, value]) => (
             <div key={label} className="bg-[var(--background)] px-6 py-[22px]">
               <div className="font-mono-tabular text-[30px] font-semibold text-[var(--primary)]">{value}</div>
@@ -116,7 +116,7 @@ export default function HomePage() {
             <span className="text-[14px]">
               You&apos;ve launched <strong className="font-mono-tabular">{myTotals ? fmtInt(myTotals.coins) : "…"}</strong>{" "}
               {myTotals?.coins === 1 ? "coin" : "coins"} ·{" "}
-              <strong className="font-mono-tabular">{myTotals ? fmtEth(myTotals.vaultEth) : "…"}</strong> ETH in vaults
+              <strong className="font-mono-tabular">{myTotals ? fmtEth(myTotals.vaultEth) : "…"}</strong> ETH in reserves
             </span>
             <span className="text-[13px] font-semibold text-[var(--primary)]">View profile →</span>
           </Link>
@@ -127,11 +127,11 @@ export default function HomePage() {
         <div className="flex flex-col items-start justify-between gap-6 rounded-[var(--radius)] border border-[var(--border)] bg-gradient-to-br from-[var(--card)] to-[var(--background)] p-9 md:flex-row md:items-center">
           <div>
             <span className="mb-3 inline-block rounded-full bg-[var(--primary)] px-2.5 py-[3px] text-[11px] font-bold tracking-wide text-[var(--primary-foreground)]">
-              New · Card Vaults
+              New · Card Reserves
             </span>
-            <h2 className="max-w-[420px] text-[26px]">Vaults that hunt real cards.</h2>
+            <h2 className="max-w-[420px] text-[26px]">Reserves that hunt real cards.</h2>
             <p className="mt-2 max-w-[420px] text-[var(--muted-foreground)]">
-              Pair a coin with Pokémon or One Piece listings. Its vault stacks graded cards as it goes and raffles them
+              Pair a coin with Pokémon or One Piece listings. Its reserve stacks graded cards as it goes and raffles them
               straight to holders.
             </p>
           </div>
@@ -139,14 +139,14 @@ export default function HomePage() {
             href="/cards"
             className={cn("flex min-h-11 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-[14px] font-semibold text-[var(--primary-foreground)] hover:bg-[#e5e5e5]", focusRing)}
           >
-            See Card Vaults →
+            See Card Reserves →
           </Link>
         </div>
       </section>
 
       <section className="mx-auto max-w-[1180px] px-6 py-16">
         <div className="mb-9 max-w-[560px]">
-          <h2 className="text-[34px]">How the vault works</h2>
+          <h2 className="text-[34px]">How the reserve works</h2>
           <p className="mt-2.5 text-[15px] text-[var(--muted-foreground)]">
             Every launch is bound to these rules on day one. Nothing here can change after the coin ships.
           </p>

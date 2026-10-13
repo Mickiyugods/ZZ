@@ -102,7 +102,7 @@ export default function ProfilePage() {
               <div className="font-mono-tabular text-[22px] font-semibold text-[var(--primary)]">
                 {totals ? fmtEth(totals.vault) : "—"}
               </div>
-              <div className="text-[11px] uppercase tracking-wider text-[var(--muted-foreground)]">ETH in vaults</div>
+              <div className="text-[11px] uppercase tracking-wider text-[var(--muted-foreground)]">ETH in reserves</div>
             </div>
             <div>
               <div className="font-mono-tabular text-[22px] font-semibold text-[var(--primary)]">
@@ -137,7 +137,7 @@ export default function ProfilePage() {
       </section>
 
       <section className="mx-auto max-w-[1180px] px-6 pb-16">
-        <h2 className="mb-5 text-[22px]">Your card vaults</h2>
+        <h2 className="mb-5 text-[22px]">Your card reserves</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy={rows === null}>
           {error ? (
             <div role="alert" className="col-span-full rounded-[var(--radius)] border border-dashed border-[var(--border)] py-[60px] text-center text-[var(--muted-foreground)]">
@@ -149,9 +149,9 @@ export default function ProfilePage() {
             cards.map((row) => <CoinCard key={row.token} row={row} />)
           ) : (
             <div className="col-span-full rounded-[var(--radius)] border border-dashed border-[var(--border)] py-[60px] text-center text-[var(--muted-foreground)]">
-              No card vaults launched yet.{" "}
+              No card reserves launched yet.{" "}
               <Link href="/cards" className="text-[var(--primary)]">
-                Launch a card vault →
+                Launch a card reserve →
               </Link>
             </div>
           )}

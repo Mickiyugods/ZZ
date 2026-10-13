@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 const TABS: { key: "new" | "top" | "nfts"; label: string }[] = [
   { key: "new", label: "New" },
-  { key: "top", label: "Top vault" },
+  { key: "top", label: "Top reserve" },
   { key: "nfts", label: "Most NFTs" },
 ];
 
@@ -78,7 +78,7 @@ export default function ExplorePage() {
       <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-4">
         {[
           ["Coins", data ? fmtInt(data.coins) : "—"],
-          ["ETH in vaults", data ? fmtEth(data.vaultEth) : "—"],
+          ["ETH in reserves", data ? fmtEth(data.vaultEth) : "—"],
           ["NFTs held", data ? fmtInt(data.nftsHeld) : "—"],
           ["Fees awaiting", data ? `${fmtEth(data.feesAwaiting)} ETH` : "—"],
         ].map(([label, value]) => (

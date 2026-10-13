@@ -9,13 +9,13 @@ import { PrivyAppProvider } from "@/components/providers/privy-app-provider";
 import { ToastProvider } from "@/lib/toast";
 
 export const metadata: Metadata = {
-  title: "ZEEP — memecoins with a vault inside",
+  title: "ZEEP — memecoins with a reserve inside",
   description:
     "Launch a coin on Robinhood Chain, link it to any listed NFT collection, and let a share of every trade buy real NFTs for a raffle, hold or burn.",
   openGraph: {
     type: "website",
-    title: "ZEEP — memecoins with a vault inside",
-    description: "A coin with a vault inside. Trading fees buy real NFTs and graded cards for holders.",
+    title: "ZEEP — memecoins with a reserve inside",
+    description: "A coin with a reserve inside. Trading fees buy real NFTs and graded cards for holders.",
   },
   twitter: { card: "summary_large_image" },
 };

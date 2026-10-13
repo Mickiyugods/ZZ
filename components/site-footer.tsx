@@ -15,7 +15,7 @@ export function SiteFooter() {
             Explore
           </Link>
           <Link href="/cards" className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] hover:text-[var(--foreground)]">
-            Card Vaults
+            Card Reserves
           </Link>
           <Link href="/launch" className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] hover:text-[var(--foreground)]">
             Launch

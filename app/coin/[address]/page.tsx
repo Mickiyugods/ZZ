@@ -143,27 +143,27 @@ export default function CoinPage({ params }: { params: Promise<{ address: string
       <section className="mx-auto grid max-w-[1180px] gap-6 px-6 pb-20 lg:grid-cols-[1.4fr_1fr]">
         <div>
           <Panel
-            title="Vault"
+            title="Reserve"
             action={
               <span className="rounded-full border border-[var(--border)] bg-[var(--background)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-[var(--muted-foreground)]">
                 Simulated
               </span>
             }
           >
-            <PanelRow label="Vault balance" value={`${fmtEth(row.vault_eth)} ETH`} />
+            <PanelRow label="Reserve balance" value={`${fmtEth(row.vault_eth)} ETH`} />
             <PanelRow label="NFTs held" value={fmtInt(row.nfts_held)} />
             <PanelRow label="Fees awaiting harvest" value={`${fmtEth(row.fees_awaiting)} ETH`} />
             <PanelRow label="Collects" value={row.collection_name} />
             <PanelRow label="Outcome" value={policyLabel(row.policy)} />
             <PanelRow label="Marketplace" value="Seaport 1.6 only" last />
             <p className="mt-3 text-[12px] text-[var(--muted-foreground)]">
-              This vault is reading real on-chain fee data, but purchases and draws are logged, not executed — no real ETH has
+              This reserve is reading real on-chain fee data, but purchases and draws are logged, not executed — no real ETH has
               moved yet.
             </p>
           </Panel>
 
           <Panel
-            title="Vault activity"
+            title="Reserve activity"
             className="mt-5"
             action={
               process.env.NODE_ENV !== "production" ? (
@@ -185,7 +185,7 @@ export default function CoinPage({ params }: { params: Promise<{ address: string
               <div className="py-6 text-center text-[var(--muted-foreground)]">Loading…</div>
             ) : events.length === 0 ? (
               <div className="rounded-[var(--radius)] border border-dashed border-[var(--border)] py-10 text-center text-[var(--muted-foreground)]">
-                No vault activity yet. Fees harvest automatically once this coin has real trades.
+                No reserve activity yet. Fees harvest automatically once this coin has real trades.
               </div>
             ) : (
               <ul className="flex flex-col gap-1">

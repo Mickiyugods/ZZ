@@ -39,7 +39,7 @@ export function CoinCard({ row }: { row: CoinRow }) {
           Collects <strong className="font-semibold text-[var(--foreground)]">{row.collection_name}</strong>
         </div>
         <div className="mt-3.5 flex items-center justify-between border-t border-[var(--border)] pt-3 font-mono-tabular text-[13px]">
-          <span className="text-[var(--muted-foreground)]">Vault</span>
+          <span className="text-[var(--muted-foreground)]">Reserve</span>
           <span>
             {fmtEth(row.vault_eth)} ETH <span className="text-[var(--muted-foreground)]">· {fmtInt(row.nfts_held)} NFTs</span>
           </span>

@@ -11,7 +11,7 @@ interface ChatMessage {
 
 const GREETING: ChatMessage = {
   role: "assistant",
-  content: "Hi, I'm the ZEEP Assistant. Ask me how vaults, raffles, or launching a coin works.",
+  content: "Hi, I'm the ZEEP Assistant. Ask me how reserves, raffles, or launching a coin works.",
 };
 
 const focusRing =
@@ -105,7 +105,7 @@ export function AiAgent() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask about vaults, raffles…"
+                placeholder="Ask about reserves, raffles…"
                 className="input min-h-9 flex-1 py-2 text-[13px]"
                 disabled={sending}
               />

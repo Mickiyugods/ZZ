@@ -71,10 +71,10 @@ export default function CollectionsPage() {
       <h1 className="text-[40px]">Collections</h1>
       <p className="mt-2 max-w-[560px] text-[var(--muted-foreground)]">
         {fmtInt(pfpAndArt.length)} real PFP and art collections a new coin can be paired with. Each coin sweeps exactly
-        one — native on Robinhood Chain, or via a cross-chain vault for the rest (Ethereum, Base, Hyperliquid, Polygon,
+        one — native on Robinhood Chain, or via a cross-chain reserve for the rest (Ethereum, Base, Hyperliquid, Polygon,
         Solana). Looking for graded cards?{" "}
         <Link href="/cards" className="text-[var(--primary)] underline-offset-2 hover:underline">
-          See Card Vaults →
+          See Card Reserves →
         </Link>
       </p>
 
@@ -128,7 +128,7 @@ export default function CollectionsPage() {
               <th className="px-4 py-3 font-medium">Collection</th>
               <th className="px-4 py-3 font-medium">Chain</th>
               <th className="px-4 py-3 font-medium">Coins</th>
-              <th className="px-4 py-3 font-medium">ETH in vaults</th>
+              <th className="px-4 py-3 font-medium">ETH in reserves</th>
               <th className="px-4 py-3 font-medium">NFTs held</th>
             </tr>
           </thead>

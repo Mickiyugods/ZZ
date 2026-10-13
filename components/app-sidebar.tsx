@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { href: "/", label: "Home", icon: IconHome2 },
   { href: "/explore", label: "Explore", icon: IconCompass },
-  { href: "/cards", label: "Card Vaults", icon: IconCards },
+  { href: "/cards", label: "Card Reserves", icon: IconCards },
   { href: "/collections", label: "Collections", icon: IconLayoutGrid },
   { href: "/launch", label: "Launch", icon: IconRocket },
   { href: "/profile", label: "Profile", icon: IconUser },
