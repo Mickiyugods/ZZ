@@ -137,6 +137,16 @@ export default function ContractsPage() {
           ))}
         </div>
       </div>
+
+      <div className="mt-10 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-5">
+        <h2 className="text-[16px] font-semibold">Who controls the treasury</h2>
+        <p className="mt-1.5 max-w-[640px] text-[13px] leading-relaxed text-[var(--muted-foreground)]">
+          ZeepFeeRouter&apos;s 20% split goes to a single wallet controlled by the ZEEP project owner — not a DAO, not a
+          multisig, not a contract with its own governance. That wallet has no access to any coin&apos;s reserve; it only
+          ever receives the protocol&apos;s own cut, the same mechanical way a reserve receives a coin&apos;s. No address is
+          listed here yet because ZeepFeeRouter isn&apos;t deployed — see the &quot;Not deployed&quot; contracts above.
+        </p>
+      </div>
     </section>
   );
 }

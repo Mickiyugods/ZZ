@@ -56,6 +56,16 @@ export default function DocsPage() {
             <li>• Harvesting accrued fees into the reserve is callable by anyone — it&apos;s not gated behind a privileged account.</li>
             <li>• Raffle draws are seeded from a future block hash, so no one — including ZEEP — can see the outcome before it&apos;s committed.</li>
           </ul>
+          <p>
+            The ZEEP treasury — the 20% side of that split — is a single wallet controlled by the ZEEP project owner, not a
+            DAO or a separate governance contract. It receives the protocol&apos;s share the same mechanical way a coin&apos;s
+            reserve receives its own: there&apos;s no special privilege beyond that, and it has no access to any coin&apos;s
+            reserve. See{" "}
+            <Link href="/contracts" className="text-[var(--primary)] hover:underline">
+              Contracts
+            </Link>{" "}
+            for the contract that enforces the split.
+          </p>
         </Section>
 
         <Section title="Card collections">
