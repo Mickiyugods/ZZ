@@ -14,6 +14,10 @@ import {
   IconLayoutGrid,
   IconUser,
   IconFolders,
+  IconLifebuoy,
+  IconBook2,
+  IconFileCode2,
+  IconHelpCircle,
 } from "@tabler/icons-react";
 import {
   Sidebar,
@@ -51,6 +55,12 @@ const COLLECTIONS_GROUP: NavItemDef[] = [
 const BOTTOM_NAV: NavItemDef[] = [
   { href: "/launch", label: "Launch", icon: IconRocket },
   { href: "/profile", label: "Profile", icon: IconUser },
+];
+
+const RESOURCES_GROUP: NavItemDef[] = [
+  { href: "/docs", label: "Docs", icon: IconBook2 },
+  { href: "/contracts", label: "Contracts", icon: IconFileCode2 },
+  { href: "/faq", label: "FAQ", icon: IconHelpCircle },
 ];
 
 const RAIL_WIDTH = 72;
@@ -328,6 +338,7 @@ export function AppSidebar() {
 
   const isActive = React.useCallback((href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href)), [pathname]);
   const collectionsActive = isActive("/cards") || isActive("/collections");
+  const resourcesActive = RESOURCES_GROUP.some((item) => isActive(item.href));
 
   const navItems = (
     <SidebarSection>
@@ -353,6 +364,21 @@ export function AppSidebar() {
       {BOTTOM_NAV.map((item) => (
         <NavLink key={item.href} item={item} active={isActive(item.href)} onClick={navClick(item.href)} />
       ))}
+
+      <NavGroup label="Resources" icon={IconLifebuoy} defaultOpen={resourcesActive} active={resourcesActive}>
+        {RESOURCES_GROUP.map((item) => (
+          <SidebarItem
+            key={item.href}
+            href={item.href}
+            icon={<item.icon className="size-[18px]" stroke={1.75} />}
+            active={isActive(item.href)}
+            onClick={navClick(item.href)}
+            className="min-h-11"
+          >
+            {item.label}
+          </SidebarItem>
+        ))}
+      </NavGroup>
     </SidebarSection>
   );
 
