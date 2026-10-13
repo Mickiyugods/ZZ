@@ -12,19 +12,6 @@ import { cn } from "@/lib/utils";
 const focusRing =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]";
 
-const MECH: [string, string][] = [
-  ["PAIRING", "locked at launch"],
-  ["FEE SPLIT", "80% reserve / 20% protocol"],
-  ["SPEND CAP", "price ≤ posted ceiling"],
-  ["CEILING TTL", "expires in 1 hour"],
-  ["MARKETPLACE", "Seaport 1.6 only"],
-  ["WITHDRAWALS", "disabled by design"],
-  ["HARVEST", "callable by anyone"],
-  ["DRAW SOURCE", "future block hash"],
-  ["OUTCOME", "raffle, hold or burn"],
-  ["ADMIN KEYS", "none on the reserve"],
-];
-
 // Real, recognizable NFT collections (see /collections for the full real
 // list — not imported here: it's 400+ entries and this only ever needs 3).
 // Hardcoded, not fabricated: the same OpenSea-hosted logos shown there.
@@ -141,23 +128,6 @@ export default function HomePage() {
           >
             See Card Collections →
           </Link>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-[1180px] px-6 py-16">
-        <div className="mb-9 max-w-[560px]">
-          <h2 className="text-[34px]">How the reserve works</h2>
-          <p className="mt-2.5 text-[15px] text-[var(--muted-foreground)]">
-            Every launch is bound to these rules on day one. Nothing here can change after the coin ships.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--border)] lg:grid-cols-5">
-          {MECH.map(([k, v]) => (
-            <div key={k} className="bg-[var(--background)] px-4 py-[18px]">
-              <div className="text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">{k}</div>
-              <div className="mt-1.5 text-[14px] font-semibold">{v}</div>
-            </div>
-          ))}
         </div>
       </section>
 
