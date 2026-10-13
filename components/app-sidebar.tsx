@@ -67,6 +67,15 @@ const PIN_KEY = "zeep.sidebar.pinned";
 const OPEN_DELAY = 110;
 const CLOSE_DELAY = 200;
 
+// Exclusive accordion: at most one of these two groups is open at a time.
+type GroupKey = "collections" | "resources";
+
+function groupForPathname(pathname: string): GroupKey | null {
+  if (COLLECTIONS_GROUP.some((item) => pathname.startsWith(item.href))) return "collections";
+  if (RESOURCES_GROUP.some((item) => pathname.startsWith(item.href))) return "resources";
+  return null;
+}
+
 const focusRing =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]";
 
@@ -235,21 +244,25 @@ function NavLink({ item, active, onClick }: { item: NavItemDef; active: boolean;
   );
 }
 
-// Accordion group (the "My Collections" section) — collapses/expands via
-// the existing SidebarNested primitive. When the rail itself is collapsed
-// to icons-only, it behaves like a single icon with a tooltip, same as a
-// flat NavLink; hovering the rail expands it (see AppSidebar), at which
-// point the chevron and sub-items become usable.
+// Accordion group (the "My Collections" / "Resources" sections) — collapses/
+// expands via the existing SidebarNested primitive, now in CONTROLLED mode
+// (`open` + `onOpenChange` instead of `defaultOpen`) so AppSidebar can keep
+// only one group open at a time — see `openGroup` there. When the rail
+// itself is collapsed to icons-only, it behaves like a single icon with a
+// tooltip, same as a flat NavLink; hovering the rail expands it (see
+// AppSidebar), at which point the chevron and sub-items become usable.
 function NavGroup({
   label,
   icon: Icon,
-  defaultOpen,
+  open,
+  onOpenChange,
   active,
   children,
 }: {
   label: string;
   icon: NavItemDef["icon"];
-  defaultOpen: boolean;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   active: boolean;
   children: React.ReactNode;
 }) {
@@ -258,7 +271,7 @@ function NavGroup({
 
   return (
     <div ref={anchorRef} onMouseEnter={onEnter} onMouseLeave={onLeave} onFocus={onEnter} onBlur={onLeave}>
-      <SidebarNested icon={<Icon className="size-[18px]" stroke={1.75} />} label={label} defaultOpen={defaultOpen} active={active}>
+      <SidebarNested icon={<Icon className="size-[18px]" stroke={1.75} />} label={label} open={open} onOpenChange={onOpenChange} active={active}>
         {children}
       </SidebarNested>
       <NavTooltip label={label} anchorRef={anchorRef} show={collapsed && show} />
@@ -282,6 +295,17 @@ export function AppSidebar() {
   const router = useRouter();
   const navClick = useNavClick(router);
   const mobileOpen = useSyncExternalStore(subscribeMobile, () => mobileSidebarStore.open, () => false);
+
+  // Exclusive accordion state: which of the two nav groups (if any) is open.
+  // Initialized from the current route so a deep link lands with its parent
+  // group already expanded, then kept in sync on every navigation — without
+  // ever forcing a group closed just because the user browsed to a page
+  // outside both groups (e.g. Home), only switching/opening on request.
+  const [openGroup, setOpenGroup] = React.useState<GroupKey | null>(() => groupForPathname(pathname));
+  React.useEffect(() => {
+    const g = groupForPathname(pathname);
+    if (g) setOpenGroup(g);
+  }, [pathname]);
 
   // Desktop: a slim icon rail that expands into an overlay on hover (after a
   // short delay, so passing the cursor over it doesn't flash it open) or
@@ -346,7 +370,13 @@ export function AppSidebar() {
         <NavLink key={item.href} item={item} active={isActive(item.href)} onClick={navClick(item.href)} />
       ))}
 
-      <NavGroup label="My Collections" icon={IconFolders} defaultOpen={collectionsActive} active={collectionsActive}>
+      <NavGroup
+        label="My Collections"
+        icon={IconFolders}
+        open={openGroup === "collections"}
+        onOpenChange={(next) => setOpenGroup(next ? "collections" : null)}
+        active={collectionsActive}
+      >
         {COLLECTIONS_GROUP.map((item) => (
           <SidebarItem
             key={item.href}
@@ -361,7 +391,13 @@ export function AppSidebar() {
         ))}
       </NavGroup>
 
-      <NavGroup label="Resources" icon={IconLifebuoy} defaultOpen={resourcesActive} active={resourcesActive}>
+      <NavGroup
+        label="Resources"
+        icon={IconLifebuoy}
+        open={openGroup === "resources"}
+        onOpenChange={(next) => setOpenGroup(next ? "resources" : null)}
+        active={resourcesActive}
+      >
         {RESOURCES_GROUP.map((item) => (
           <SidebarItem
             key={item.href}
