@@ -6,9 +6,9 @@ import type { TypedContractEvent, TypedDeferredTopicFilter, TypedEventLog, Typed
   
 
   export interface ZeepExternalRaffleInterface extends Interface {
-    getFunction(nameOrSignature: "COMMIT_LEAD_BLOCKS" | "DRAW_WINDOW_BLOCKS" | "SNAPSHOT_WAIT" | "commitDraw" | "draw" | "giveaways" | "keeper" | "openGiveaway" | "recordDelivery" | "setKeeper" | "tokenKey" | "vault" | "verifyWinner"): FunctionFragment;
+    getFunction(nameOrSignature: "COMMIT_LEAD_BLOCKS" | "DRAW_WINDOW_BLOCKS" | "SNAPSHOT_WAIT" | "commitDraw" | "draw" | "giveaways" | "keeper" | "openGiveaway" | "owner" | "recordDelivery" | "renounceOwnership" | "setKeeper" | "tokenKey" | "transferOwnership" | "vault" | "verifyWinner"): FunctionFragment;
 
-    getEvent(nameOrSignatureOrTopic: "DeliveryRecorded" | "DrawCommitted" | "DrawCompleted" | "GiveawayOpened" | "KeeperUpdated" | "WinnerVerified"): EventFragment;
+    getEvent(nameOrSignatureOrTopic: "DeliveryRecorded" | "DrawCommitted" | "DrawCompleted" | "GiveawayOpened" | "KeeperUpdated" | "OwnershipTransferred" | "WinnerVerified"): EventFragment;
 
     encodeFunctionData(functionFragment: 'COMMIT_LEAD_BLOCKS', values?: undefined): string;
 encodeFunctionData(functionFragment: 'DRAW_WINDOW_BLOCKS', values?: undefined): string;
@@ -18,9 +18,12 @@ encodeFunctionData(functionFragment: 'draw', values: [string]): string;
 encodeFunctionData(functionFragment: 'giveaways', values: [BytesLike]): string;
 encodeFunctionData(functionFragment: 'keeper', values?: undefined): string;
 encodeFunctionData(functionFragment: 'openGiveaway', values: [string, BytesLike, BigNumberish]): string;
+encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
 encodeFunctionData(functionFragment: 'recordDelivery', values: [string, string]): string;
+encodeFunctionData(functionFragment: 'renounceOwnership', values?: undefined): string;
 encodeFunctionData(functionFragment: 'setKeeper', values: [AddressLike]): string;
 encodeFunctionData(functionFragment: 'tokenKey', values: [string]): string;
+encodeFunctionData(functionFragment: 'transferOwnership', values: [AddressLike]): string;
 encodeFunctionData(functionFragment: 'vault', values?: undefined): string;
 encodeFunctionData(functionFragment: 'verifyWinner', values: [string, AddressLike, BigNumberish, BigNumberish, BytesLike[]]): string;
 
@@ -32,9 +35,12 @@ decodeFunctionResult(functionFragment: 'draw', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'giveaways', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'keeper', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'openGiveaway', data: BytesLike): Result;
+decodeFunctionResult(functionFragment: 'owner', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'recordDelivery', data: BytesLike): Result;
+decodeFunctionResult(functionFragment: 'renounceOwnership', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'setKeeper', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'tokenKey', data: BytesLike): Result;
+decodeFunctionResult(functionFragment: 'transferOwnership', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'vault', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'verifyWinner', data: BytesLike): Result;
   }
@@ -92,6 +98,18 @@ decodeFunctionResult(functionFragment: 'verifyWinner', data: BytesLike): Result;
       export type InputTuple = [keeper: AddressLike];
       export type OutputTuple = [keeper: string];
       export interface OutputObject {keeper: string };
+      export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>
+      export type Filter = TypedDeferredTopicFilter<Event>
+      export type Log = TypedEventLog<Event>
+      export type LogDescription = TypedLogDescription<Event>
+    }
+
+  
+
+    export namespace OwnershipTransferredEvent {
+      export type InputTuple = [previousOwner: AddressLike, newOwner: AddressLike];
+      export type OutputTuple = [previousOwner: string, newOwner: string];
+      export interface OutputObject {previousOwner: string, newOwner: string };
       export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>
       export type Filter = TypedDeferredTopicFilter<Event>
       export type Log = TypedEventLog<Event>
@@ -210,8 +228,24 @@ decodeFunctionResult(functionFragment: 'verifyWinner', data: BytesLike): Result;
     
 
     
+    owner: TypedContractMethod<
+      [],
+      [string],
+      'view'
+    >
+    
+
+    
     recordDelivery: TypedContractMethod<
       [externalTokenId: string, targetChainTxHash: string, ],
+      [void],
+      'nonpayable'
+    >
+    
+
+    
+    renounceOwnership: TypedContractMethod<
+      [],
       [void],
       'nonpayable'
     >
@@ -230,6 +264,14 @@ decodeFunctionResult(functionFragment: 'verifyWinner', data: BytesLike): Result;
       [externalTokenId: string, ],
       [string],
       'view'
+    >
+    
+
+    
+    transferOwnership: TypedContractMethod<
+      [newOwner: AddressLike, ],
+      [void],
+      'nonpayable'
     >
     
 
@@ -292,8 +334,18 @@ getFunction(nameOrSignature: 'openGiveaway'): TypedContractMethod<
       [void],
       'nonpayable'
     >;
+getFunction(nameOrSignature: 'owner'): TypedContractMethod<
+      [],
+      [string],
+      'view'
+    >;
 getFunction(nameOrSignature: 'recordDelivery'): TypedContractMethod<
       [externalTokenId: string, targetChainTxHash: string, ],
+      [void],
+      'nonpayable'
+    >;
+getFunction(nameOrSignature: 'renounceOwnership'): TypedContractMethod<
+      [],
       [void],
       'nonpayable'
     >;
@@ -306,6 +358,11 @@ getFunction(nameOrSignature: 'tokenKey'): TypedContractMethod<
       [externalTokenId: string, ],
       [string],
       'view'
+    >;
+getFunction(nameOrSignature: 'transferOwnership'): TypedContractMethod<
+      [newOwner: AddressLike, ],
+      [void],
+      'nonpayable'
     >;
 getFunction(nameOrSignature: 'vault'): TypedContractMethod<
       [],
@@ -323,6 +380,7 @@ getEvent(key: 'DrawCommitted'): TypedContractEvent<DrawCommittedEvent.InputTuple
 getEvent(key: 'DrawCompleted'): TypedContractEvent<DrawCompletedEvent.InputTuple, DrawCompletedEvent.OutputTuple, DrawCompletedEvent.OutputObject>;
 getEvent(key: 'GiveawayOpened'): TypedContractEvent<GiveawayOpenedEvent.InputTuple, GiveawayOpenedEvent.OutputTuple, GiveawayOpenedEvent.OutputObject>;
 getEvent(key: 'KeeperUpdated'): TypedContractEvent<KeeperUpdatedEvent.InputTuple, KeeperUpdatedEvent.OutputTuple, KeeperUpdatedEvent.OutputObject>;
+getEvent(key: 'OwnershipTransferred'): TypedContractEvent<OwnershipTransferredEvent.InputTuple, OwnershipTransferredEvent.OutputTuple, OwnershipTransferredEvent.OutputObject>;
 getEvent(key: 'WinnerVerified'): TypedContractEvent<WinnerVerifiedEvent.InputTuple, WinnerVerifiedEvent.OutputTuple, WinnerVerifiedEvent.OutputObject>;
 
     filters: {
@@ -345,6 +403,10 @@ getEvent(key: 'WinnerVerified'): TypedContractEvent<WinnerVerifiedEvent.InputTup
 
       'KeeperUpdated(address)': TypedContractEvent<KeeperUpdatedEvent.InputTuple, KeeperUpdatedEvent.OutputTuple, KeeperUpdatedEvent.OutputObject>;
       KeeperUpdated: TypedContractEvent<KeeperUpdatedEvent.InputTuple, KeeperUpdatedEvent.OutputTuple, KeeperUpdatedEvent.OutputObject>;
+    
+
+      'OwnershipTransferred(address,address)': TypedContractEvent<OwnershipTransferredEvent.InputTuple, OwnershipTransferredEvent.OutputTuple, OwnershipTransferredEvent.OutputObject>;
+      OwnershipTransferred: TypedContractEvent<OwnershipTransferredEvent.InputTuple, OwnershipTransferredEvent.OutputTuple, OwnershipTransferredEvent.OutputObject>;
     
 
       'WinnerVerified(bytes32,address)': TypedContractEvent<WinnerVerifiedEvent.InputTuple, WinnerVerifiedEvent.OutputTuple, WinnerVerifiedEvent.OutputObject>;

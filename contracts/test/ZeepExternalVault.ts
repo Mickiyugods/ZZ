@@ -74,9 +74,9 @@ describe("ZeepExternalRaffle", function () {
   }
 
   async function deploy() {
-    const [keeper, holderA, holderB] = await ethers.getSigners();
+    const [keeper, holderA, holderB, owner] = await ethers.getSigners();
     const vault = await ethers.deployContract("ZeepExternalVault", ["ethereum", "0xCollection", await keeper.getAddress(), await keeper.getAddress()]);
-    const raffle = await ethers.deployContract("ZeepExternalRaffle", [await vault.getAddress(), await keeper.getAddress()]);
+    const raffle = await ethers.deployContract("ZeepExternalRaffle", [await vault.getAddress(), await keeper.getAddress(), await owner.getAddress()]);
 
     const entries: [string, bigint, bigint][] = [
       [await holderA.getAddress(), 0n, 60n],
@@ -84,7 +84,7 @@ describe("ZeepExternalRaffle", function () {
     ];
     const leaves = entries.map(([w, s, c]) => hashLeaf(w, s, c));
     const root = ethers.keccak256(ethers.concat([leaves[0], leaves[1]].sort()));
-    return { keeper, holderA, holderB, raffle, entries, leaves, root };
+    return { keeper, holderA, holderB, owner, raffle, entries, leaves, root };
   }
 
   it("verifies a winner on-chain and lets the keeper record off-chain delivery, without ever touching an asset", async function () {
@@ -115,5 +115,19 @@ describe("ZeepExternalRaffle", function () {
     await expect(raffle.connect(keeper).recordDelivery(tokenId, "0xrealdeliverytxonmainnet"))
       .to.emit(raffle, "DeliveryRecorded")
       .withArgs(key, winnerAddr, "0xrealdeliverytxonmainnet");
+  });
+
+  it("rejects opening a giveaway with zero tickets instead of bricking it", async function () {
+    const { keeper, raffle } = await deploy();
+    await expect(raffle.connect(keeper).openGiveaway("courtyard-1", ethers.ZeroHash, 0n)).to.be.revertedWithCustomError(raffle, "ZeroTickets");
+  });
+
+  it("only the registry owner can rotate the keeper — not the keeper itself", async function () {
+    const { keeper, raffle, owner, holderA } = await deploy();
+    await expect(raffle.connect(keeper).setKeeper(await holderA.getAddress())).to.be.revertedWithCustomError(raffle, "OwnableUnauthorizedAccount");
+    await expect(raffle.connect(owner).setKeeper(await holderA.getAddress()))
+      .to.emit(raffle, "KeeperUpdated")
+      .withArgs(await holderA.getAddress());
+    expect(await raffle.keeper()).to.equal(await holderA.getAddress());
   });
 });

@@ -44,7 +44,7 @@ describe("ZeepRaffle", function () {
   const TOKEN_ID = 7n;
 
   async function deployRaffleWithNft() {
-    const [keeper, holderA, holderB, holderC] = await ethers.getSigners();
+    const [keeper, holderA, holderB, holderC, owner] = await ethers.getSigners();
     const collection = await ethers.deployContract("MockERC721");
 
     // Deploy a plain vault-like holder: for this test we only need something that
@@ -65,6 +65,7 @@ describe("ZeepRaffle", function () {
       await collection.getAddress(),
       await keeper.getAddress(),
       0, // ZeepRaffle.Policy.Raffle
+      await owner.getAddress(),
     ]);
     await vault.connect(keeper).setOutcomeHandler(await raffle.getAddress());
 
@@ -78,7 +79,7 @@ describe("ZeepRaffle", function () {
     const { root, layers } = buildTree(leaves);
     const totalTickets = 175n;
 
-    return { keeper, holderA, holderB, holderC, collection, vault, raffle, entries, leaves, layers, root, totalTickets };
+    return { keeper, holderA, holderB, holderC, owner, collection, vault, raffle, entries, leaves, layers, root, totalTickets };
   }
 
   it("opens a giveaway and runs the full commit/draw/deliver flow", async function () {
@@ -168,7 +169,7 @@ describe("ZeepRaffle", function () {
   });
 
   it("burns instead of raffling for burn-policy coins, and only the wired handler may trigger it", async function () {
-    const [keeper] = await ethers.getSigners();
+    const [keeper, owner] = await ethers.getSigners();
     const collection = await ethers.deployContract("MockERC721");
     const seaport = await ethers.deployContract("MockSeaport");
     const vault = await ethers.deployContract("ZeepVault", [
@@ -184,6 +185,7 @@ describe("ZeepRaffle", function () {
       await collection.getAddress(),
       await keeper.getAddress(),
       1, // ZeepRaffle.Policy.Burn
+      await owner.getAddress(),
     ]);
     await vault.connect(keeper).setOutcomeHandler(await burnRaffle.getAddress());
 
@@ -196,7 +198,7 @@ describe("ZeepRaffle", function () {
     const { keeper, raffle, root, totalTickets } = await deployRaffleWithNft();
     await expect(raffle.connect(keeper).burnNow(TOKEN_ID)).to.be.revertedWithCustomError(raffle, "WrongPolicy");
 
-    const [, , , , strangerKeeper] = await ethers.getSigners();
+    const [, , , , strangerKeeper, owner] = await ethers.getSigners();
     void strangerKeeper;
     const collection = await ethers.deployContract("MockERC721");
     const seaport = await ethers.deployContract("MockSeaport");
@@ -211,7 +213,27 @@ describe("ZeepRaffle", function () {
       await collection.getAddress(),
       await keeper.getAddress(),
       1,
+      await owner.getAddress(),
     ]);
     await expect(burnRaffle.connect(keeper).openGiveaway(TOKEN_ID, root, totalTickets)).to.be.revertedWithCustomError(burnRaffle, "WrongPolicy");
+  });
+
+  it("rejects opening a giveaway with zero tickets instead of bricking it", async function () {
+    const { keeper, raffle, root } = await deployRaffleWithNft();
+    await expect(raffle.connect(keeper).openGiveaway(TOKEN_ID, root, 0n)).to.be.revertedWithCustomError(raffle, "ZeroTickets");
+  });
+
+  it("only the registry owner can rotate the keeper — not the keeper itself, and a stranger can recover from a compromised key", async function () {
+    const { keeper, raffle, owner, holderA } = await deployRaffleWithNft();
+
+    // The old keeper can no longer rotate itself out — this is exactly the gap
+    // the owner-gated setKeeper closes (a compromised keeper could otherwise
+    // keep control of this contract even after being rotated out on the vault).
+    await expect(raffle.connect(keeper).setKeeper(await holderA.getAddress())).to.be.revertedWithCustomError(raffle, "OwnableUnauthorizedAccount");
+
+    await expect(raffle.connect(owner).setKeeper(await holderA.getAddress()))
+      .to.emit(raffle, "KeeperUpdated")
+      .withArgs(await holderA.getAddress());
+    expect(await raffle.keeper()).to.equal(await holderA.getAddress());
   });
 });

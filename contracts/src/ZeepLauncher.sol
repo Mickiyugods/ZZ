@@ -76,7 +76,7 @@ contract ZeepLauncher {
 
         if (policy != Policy.Hold) {
             ZeepRaffle.Policy outcomePolicy = policy == Policy.Raffle ? ZeepRaffle.Policy.Raffle : ZeepRaffle.Policy.Burn;
-            raffle = address(new ZeepRaffle(vault, collection, keeper, outcomePolicy));
+            raffle = address(new ZeepRaffle(vault, collection, keeper, outcomePolicy, registryOwner));
             ZeepVault(payable(vault)).setOutcomeHandler(raffle);
         }
 

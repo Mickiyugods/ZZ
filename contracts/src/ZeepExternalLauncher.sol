@@ -61,7 +61,7 @@ contract ZeepExternalLauncher {
 
         (token, curve) = IPonsFactory(ponsFactory).launchToken{value: msg.value}(params, launchConfigId, pairToken, new address[](0));
 
-        raffle = address(new ZeepExternalRaffle(vault, keeper));
+        raffle = address(new ZeepExternalRaffle(vault, keeper, registryOwner));
 
         emit ExternalCoinLaunched(token, curve, vault, feeRouter, raffle, targetChain, externalCollection);
     }

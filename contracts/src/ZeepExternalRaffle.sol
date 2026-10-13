@@ -2,6 +2,7 @@
 pragma solidity ^0.8.28;
 
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title ZeepExternalRaffle
 /// @notice Same public, nobody-picks-the-winner draw as ZeepRaffle (snapshot ->
@@ -12,7 +13,7 @@ import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProo
 /// won" event instead of transferring anything. The keeper (or the winner, from
 /// the Giveaways page) then sends the real NFT on the target chain and the keeper
 /// writes the receipt back with recordDelivery().
-contract ZeepExternalRaffle {
+contract ZeepExternalRaffle is Ownable {
     address public immutable vault; // the ZeepExternalVault that bought the NFT
     address public keeper;
 
@@ -59,13 +60,14 @@ contract ZeepExternalRaffle {
     error AlreadyDelivered();
     error TicketOutOfRange();
     error InvalidProof();
+    error ZeroTickets();
 
     modifier onlyKeeper() {
         if (msg.sender != keeper) revert NotKeeper();
         _;
     }
 
-    constructor(address _vault, address _keeper) {
+    constructor(address _vault, address _keeper, address _owner) Ownable(_owner) {
         vault = _vault;
         keeper = _keeper;
     }
@@ -77,6 +79,7 @@ contract ZeepExternalRaffle {
     function openGiveaway(string calldata externalTokenId, bytes32 merkleRoot, uint256 totalTickets) external onlyKeeper {
         bytes32 key = tokenKey(externalTokenId);
         if (giveaways[key].snapshotAt != 0) revert AlreadyOpened();
+        if (totalTickets == 0) revert ZeroTickets();
         giveaways[key] = Giveaway({
             merkleRoot: merkleRoot,
             totalTickets: totalTickets,
@@ -151,7 +154,9 @@ contract ZeepExternalRaffle {
         emit DeliveryRecorded(key, g.winner, targetChainTxHash);
     }
 
-    function setKeeper(address _keeper) external onlyKeeper {
+    /// @notice Registry-owner-gated — see ZeepRaffle.setKeeper for why this isn't
+    /// self-administered by the keeper.
+    function setKeeper(address _keeper) external onlyOwner {
         keeper = _keeper;
         emit KeeperUpdated(_keeper);
     }

@@ -5,6 +5,7 @@ import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProo
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 interface IZeepVault {
     function handOffToOutcome(uint256 tokenId) external;
@@ -28,7 +29,7 @@ interface IZeepVault {
 ///  5. Delivery: the winner (or anyone on their behalf) calls deliver() with their
 ///     Merkle proof; the contract verifies their ticket range covers the winning
 ///     ticket and forwards the NFT straight from the vault to their wallet.
-contract ZeepRaffle is ReentrancyGuard, IERC721Receiver {
+contract ZeepRaffle is ReentrancyGuard, IERC721Receiver, Ownable {
     enum Policy {
         Raffle,
         Burn
@@ -79,13 +80,14 @@ contract ZeepRaffle is ReentrancyGuard, IERC721Receiver {
     error AlreadyDelivered();
     error TicketOutOfRange();
     error InvalidProof();
+    error ZeroTickets();
 
     modifier onlyKeeper() {
         if (msg.sender != keeper) revert NotKeeper();
         _;
     }
 
-    constructor(address _vault, address _collection, address _keeper, Policy _policy) {
+    constructor(address _vault, address _collection, address _keeper, Policy _policy, address _owner) Ownable(_owner) {
         vault = _vault;
         collection = _collection;
         keeper = _keeper;
@@ -112,6 +114,7 @@ contract ZeepRaffle is ReentrancyGuard, IERC721Receiver {
     function openGiveaway(uint256 tokenId, bytes32 merkleRoot, uint256 totalTickets) external onlyKeeper {
         if (policy != Policy.Raffle) revert WrongPolicy();
         if (giveaways[tokenId].snapshotAt != 0) revert AlreadyOpened();
+        if (totalTickets == 0) revert ZeroTickets();
         giveaways[tokenId] = Giveaway({
             merkleRoot: merkleRoot,
             totalTickets: totalTickets,
@@ -175,10 +178,10 @@ contract ZeepRaffle is ReentrancyGuard, IERC721Receiver {
         emit Delivered(tokenId, winner);
     }
 
-    /// @notice Owner-equivalent key rotation lives on the vault; mirrored here so
-    /// the same keeper wallet operates both. Only the vault's own keeper rotation
-    /// should call this in practice — enforced at the registry/launcher level.
-    function setKeeper(address _keeper) external onlyKeeper {
+    /// @notice Registry-owner-gated, same recovery path as ZeepVault.setKeeper —
+    /// so a compromised or lost keeper key can be rotated out here independently
+    /// of the vault, instead of leaving the old key in control of this contract.
+    function setKeeper(address _keeper) external onlyOwner {
         keeper = _keeper;
         emit KeeperUpdated(_keeper);
     }
