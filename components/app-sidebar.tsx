@@ -13,19 +13,42 @@ import {
   IconWallet,
   IconLayoutGrid,
   IconUser,
+  IconFolders,
 } from "@tabler/icons-react";
-import { Sidebar, SidebarHeader, SidebarNav, SidebarSection, SidebarItem, SidebarFooter, SidebarToggle, useSidebar } from "@/components/ui/sidebar";
+import {
+  Sidebar,
+  SidebarHeader,
+  SidebarNav,
+  SidebarSection,
+  SidebarItem,
+  SidebarNested,
+  SidebarFooter,
+  SidebarToggle,
+  useSidebar,
+} from "@/components/ui/sidebar";
 import { mobileSidebarStore } from "@/lib/mobileSidebarStore";
 import { useWallet } from "@/lib/useWallet";
 import { openWallet } from "@/lib/walletDialogStore";
 import { short } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-const NAV = [
+interface NavItemDef {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string; stroke?: number }>;
+}
+
+const TOP_NAV: NavItemDef[] = [
   { href: "/", label: "Home", icon: IconHome2 },
   { href: "/explore", label: "Explore", icon: IconCompass },
-  { href: "/cards", label: "Card Reserves", icon: IconCards },
-  { href: "/collections", label: "Collections", icon: IconLayoutGrid },
+];
+
+const COLLECTIONS_GROUP: NavItemDef[] = [
+  { href: "/cards", label: "Card Collections", icon: IconCards },
+  { href: "/collections", label: "NFT Collections", icon: IconLayoutGrid },
+];
+
+const BOTTOM_NAV: NavItemDef[] = [
   { href: "/launch", label: "Launch", icon: IconRocket },
   { href: "/profile", label: "Profile", icon: IconUser },
 ];
@@ -168,30 +191,69 @@ function NavTooltip({ label, anchorRef, show }: { label: string; anchorRef: Reac
   );
 }
 
-function NavLink({ item, active, onClick }: { item: (typeof NAV)[number]; active: boolean; onClick: (e: React.MouseEvent) => void }) {
-  const { collapsed } = useSidebar();
+// Shared by NavLink and NavGroup: shows a label-anchor ref + hover/focus
+// state driving the fast collapsed-rail tooltip (see NavTooltip above).
+function useCollapsedTooltip(collapsed: boolean) {
   const anchorRef = React.useRef<HTMLDivElement>(null);
-  const [showTooltip, setShowTooltip] = React.useState(false);
-  const showTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [show, setShow] = React.useState(false);
+  const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const onEnter = React.useCallback(() => {
     if (!collapsed) return;
-    showTimer.current = setTimeout(() => setShowTooltip(true), TOOLTIP_SHOW_DELAY);
+    timer.current = setTimeout(() => setShow(true), TOOLTIP_SHOW_DELAY);
   }, [collapsed]);
   const onLeave = React.useCallback(() => {
-    if (showTimer.current) clearTimeout(showTimer.current);
-    setShowTooltip(false);
+    if (timer.current) clearTimeout(timer.current);
+    setShow(false);
   }, []);
   React.useEffect(() => () => {
-    if (showTimer.current) clearTimeout(showTimer.current);
+    if (timer.current) clearTimeout(timer.current);
   }, []);
+
+  return { anchorRef, show, onEnter, onLeave };
+}
+
+function NavLink({ item, active, onClick }: { item: NavItemDef; active: boolean; onClick: (e: React.MouseEvent) => void }) {
+  const { collapsed } = useSidebar();
+  const { anchorRef, show, onEnter, onLeave } = useCollapsedTooltip(collapsed);
 
   return (
     <div ref={anchorRef} onMouseEnter={onEnter} onMouseLeave={onLeave} onFocus={onEnter} onBlur={onLeave}>
       <SidebarItem href={item.href} icon={<item.icon className="size-[18px]" stroke={1.75} />} active={active} onClick={onClick} className="min-h-11">
         {item.label}
       </SidebarItem>
-      <NavTooltip label={item.label} anchorRef={anchorRef} show={collapsed && showTooltip} />
+      <NavTooltip label={item.label} anchorRef={anchorRef} show={collapsed && show} />
+    </div>
+  );
+}
+
+// Accordion group (the "My Collections" section) — collapses/expands via
+// the existing SidebarNested primitive. When the rail itself is collapsed
+// to icons-only, it behaves like a single icon with a tooltip, same as a
+// flat NavLink; hovering the rail expands it (see AppSidebar), at which
+// point the chevron and sub-items become usable.
+function NavGroup({
+  label,
+  icon: Icon,
+  defaultOpen,
+  active,
+  children,
+}: {
+  label: string;
+  icon: NavItemDef["icon"];
+  defaultOpen: boolean;
+  active: boolean;
+  children: React.ReactNode;
+}) {
+  const { collapsed } = useSidebar();
+  const { anchorRef, show, onEnter, onLeave } = useCollapsedTooltip(collapsed);
+
+  return (
+    <div ref={anchorRef} onMouseEnter={onEnter} onMouseLeave={onLeave} onFocus={onEnter} onBlur={onLeave}>
+      <SidebarNested icon={<Icon className="size-[18px]" stroke={1.75} />} label={label} defaultOpen={defaultOpen} active={active}>
+        {children}
+      </SidebarNested>
+      <NavTooltip label={label} anchorRef={anchorRef} show={collapsed && show} />
     </div>
   );
 }
@@ -264,15 +326,32 @@ export function AppSidebar() {
 
   const expanded = pinned || hovering;
 
+  const isActive = React.useCallback((href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href)), [pathname]);
+  const collectionsActive = isActive("/cards") || isActive("/collections");
+
   const navItems = (
     <SidebarSection>
-      {NAV.map((item) => (
-        <NavLink
-          key={item.href}
-          item={item}
-          active={item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)}
-          onClick={navClick(item.href)}
-        />
+      {TOP_NAV.map((item) => (
+        <NavLink key={item.href} item={item} active={isActive(item.href)} onClick={navClick(item.href)} />
+      ))}
+
+      <NavGroup label="My Collections" icon={IconFolders} defaultOpen={collectionsActive} active={collectionsActive}>
+        {COLLECTIONS_GROUP.map((item) => (
+          <SidebarItem
+            key={item.href}
+            href={item.href}
+            icon={<item.icon className="size-[18px]" stroke={1.75} />}
+            active={isActive(item.href)}
+            onClick={navClick(item.href)}
+            className="min-h-11"
+          >
+            {item.label}
+          </SidebarItem>
+        ))}
+      </NavGroup>
+
+      {BOTTOM_NAV.map((item) => (
+        <NavLink key={item.href} item={item} active={isActive(item.href)} onClick={navClick(item.href)} />
       ))}
     </SidebarSection>
   );

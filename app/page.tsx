@@ -127,7 +127,7 @@ export default function HomePage() {
         <div className="flex flex-col items-start justify-between gap-6 rounded-[var(--radius)] border border-[var(--border)] bg-gradient-to-br from-[var(--card)] to-[var(--background)] p-9 md:flex-row md:items-center">
           <div>
             <span className="mb-3 inline-block rounded-full bg-[var(--primary)] px-2.5 py-[3px] text-[11px] font-bold tracking-wide text-[var(--primary-foreground)]">
-              New · Card Reserves
+              New · Card Collections
             </span>
             <h2 className="max-w-[420px] text-[26px]">Reserves that hunt real cards.</h2>
             <p className="mt-2 max-w-[420px] text-[var(--muted-foreground)]">
@@ -139,7 +139,7 @@ export default function HomePage() {
             href="/cards"
             className={cn("flex min-h-11 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-[14px] font-semibold text-[var(--primary-foreground)] hover:bg-[#e5e5e5]", focusRing)}
           >
-            See Card Reserves →
+            See Card Collections →
           </Link>
         </div>
       </section>

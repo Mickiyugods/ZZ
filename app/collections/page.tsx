@@ -30,7 +30,7 @@ export default function CollectionsPage() {
   const [showAll, setShowAll] = React.useState(false);
 
   React.useEffect(() => {
-    document.title = "Collections · ZEEP";
+    document.title = "NFT Collections · ZEEP";
   }, []);
 
   React.useEffect(() => {
@@ -68,13 +68,13 @@ export default function CollectionsPage() {
 
   return (
     <section className="mx-auto max-w-[1180px] px-6 pb-16 pt-12">
-      <h1 className="text-[40px]">Collections</h1>
+      <h1 className="text-[40px]">NFT Collections</h1>
       <p className="mt-2 max-w-[560px] text-[var(--muted-foreground)]">
         {fmtInt(pfpAndArt.length)} real PFP and art collections a new coin can be paired with. Each coin sweeps exactly
         one — native on Robinhood Chain, or via a cross-chain reserve for the rest (Ethereum, Base, Hyperliquid, Polygon,
         Solana). Looking for graded cards?{" "}
         <Link href="/cards" className="text-[var(--primary)] underline-offset-2 hover:underline">
-          See Card Reserves →
+          See Card Collections →
         </Link>
       </p>
 

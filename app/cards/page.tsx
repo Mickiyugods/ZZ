@@ -15,7 +15,7 @@ export default function CardVaultsPage() {
   const [error, setError] = React.useState(false);
 
   React.useEffect(() => {
-    document.title = "Card Reserves · ZEEP";
+    document.title = "Card Collections · ZEEP";
   }, []);
 
   React.useEffect(() => {
