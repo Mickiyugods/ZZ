@@ -29,6 +29,19 @@ export const SALT_TAG = "ZEEP";
 // infrastructure, not anything ZEEP (or Vaul) deployed itself.
 export const SEAPORT_1_6 = "0x0000000000000068F116a894984e2DB1123eB395";
 
+// ZEEP's own standing contracts, filled in from env once deployed to mainnet
+// (`contracts/ignition/modules/ZeepCore.ts` deploys the two launchers; the
+// treasury is the wallet passed as its `treasury` parameter). Empty string =
+// not deployed yet — the Contracts page shows that instead of a fake address.
+// Per-coin Vault / FeeRouter / Raffle have no single address: each launch
+// deploys its own set.
+const addr = (v: string | undefined) => (v && /^0x[0-9a-fA-F]{40}$/.test(v.trim()) ? v.trim() : "");
+export const ZEEP_DEPLOYMENT = {
+  launcher: addr(process.env.NEXT_PUBLIC_ZEEP_LAUNCHER),
+  externalLauncher: addr(process.env.NEXT_PUBLIC_ZEEP_EXTERNAL_LAUNCHER),
+  treasury: addr(process.env.NEXT_PUBLIC_ZEEP_TREASURY),
+};
+
 export const VAULT = {
   vaultBps: 8000,
   protocolBps: 2000,
@@ -39,7 +52,11 @@ export const VAULT = {
 
 export const SLIPPAGE_OPTIONS = [0.5, 1, 3, 5];
 export const DEFAULT_SLIPPAGE = 3;
-export const MAX_CREATOR_TAX_BPS = 500;
+export const MAX_CREATOR_TAX_BPS = 1000;
+// Pons pays every coin's creatorFeeRecipient a base share of its 1% curve fee on
+// top of the creator tax. Measured 2026-10-18 from Pons' creator-earnings vs.
+// volume on live coins (0% tax → ~0.70%, 3% → 3.75%, 4% → 4.79%): ≈0.75%.
+export const PONS_CREATOR_BASE_BPS = 75;
 
 const SOCIALS = "(string twitter, string telegram, string discord, string website, string farcaster)";
 const LAUNCH_PARAMS = `(string name, string symbol, string logo, string description, ${SOCIALS} socials, address creatorFeeRecipient, uint16 creatorTaxBps, bool buybackEnabled, bytes32 expectedEconomics, bytes32 salt)`;
@@ -65,6 +82,8 @@ export const ABI = {
     "function sellableTokens() view returns (uint256)",
     "function graduated() view returns (bool)",
     "function feeBps() view returns (uint256)",
+    "event CurveBuy(address indexed buyer, address indexed recipient, uint256 quoteIn, uint256 tokensOut, uint256 fee, uint256 tax)",
+    "event CurveSell(address indexed seller, address indexed recipient, uint256 tokensIn, uint256 quoteOut, uint256 fee, uint256 tax)",
   ],
   token: [
     "function name() view returns (string)",

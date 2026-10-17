@@ -329,9 +329,12 @@ export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(
         variant,
         collapsed,
         toggleCollapsed,
-        navId: `sidebar-${reactId}`,
+        // Derive from an explicit `id` when given: useId() can differ between the
+        // server render and hydration when the same sidebar is mounted twice
+        // (mobile drawer + desktop rail), which React reports as a mismatch.
+        navId: (props as { id?: string }).id ? `${(props as { id?: string }).id}-nav` : `sidebar-${reactId}`,
       }),
-      [variant, collapsed, toggleCollapsed, reactId],
+      [variant, collapsed, toggleCollapsed, reactId, (props as { id?: string }).id],
     );
 
     return (
@@ -714,7 +717,7 @@ export const SidebarNested = React.forwardRef<
     },
     ref,
   ) => {
-    const { collapsed } = useSidebarContext();
+    const { collapsed, navId } = useSidebarContext();
     const prefersReducedMotion = useReducedMotion();
     const reactId = React.useId();
 
@@ -728,7 +731,11 @@ export const SidebarNested = React.forwardRef<
       onOpenChange?.(next);
     }, [open, isControlled, onOpenChange]);
 
-    const contentId = `sidebar-nested-content-${reactId}`;
+    // Stable across server/client when the label is plain text (see navId above).
+    const contentId =
+      typeof label === "string" && !navId.startsWith("sidebar-")
+        ? `${navId}-${label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`
+        : `sidebar-nested-content-${reactId}`;
 
     return (
       <div ref={ref} data-slot="sidebar-nested" className="flex flex-col">

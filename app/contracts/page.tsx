@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { CHAIN, PONS, SEAPORT_1_6 } from "@/lib/config";
+import { CHAIN, PONS, SEAPORT_1_6, ZEEP_DEPLOYMENT } from "@/lib/config";
 import { useToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 
@@ -21,8 +21,45 @@ const LIVE_CONTRACTS: LiveContract[] = [
   { name: "Pons Factory", address: PONS.factory, note: "Launches every Pons coin, ZEEP's included" },
   { name: "Pons Router", address: PONS.router, note: "Launch-and-buy in one transaction" },
   { name: "Pons Escrow", address: PONS.escrow, note: "Holds claimable creator fees the reserve harvest reads" },
-  { name: "Seaport 1.6", address: SEAPORT_1_6, note: "Canonical deployer address — same on every EVM chain, not deployed by ZEEP or Vaul" },
+  { name: "Seaport 1.6", address: SEAPORT_1_6, note: "Canonical address, identical on every EVM chain — not deployed by ZEEP" },
 ];
+
+// The headline "On-chain" grid (Curato-style): ZEEP's own standing contracts
+// first — read from env, so they flip from "Not deployed yet" to live the
+// moment mainnet addresses are set — then the shared infra they sit on.
+const ONCHAIN: { label: string; address: string; own: boolean }[] = [
+  { label: "ZeepLauncher", address: ZEEP_DEPLOYMENT.launcher, own: true },
+  { label: "ZeepExternalLauncher", address: ZEEP_DEPLOYMENT.externalLauncher, own: true },
+  { label: "Treasury", address: ZEEP_DEPLOYMENT.treasury, own: true },
+  { label: "Pons Factory", address: PONS.factory, own: false },
+  { label: "Seaport 1.6", address: SEAPORT_1_6, own: false },
+];
+
+const DEPLOYED: Record<string, string> = {
+  ZeepLauncher: ZEEP_DEPLOYMENT.launcher,
+  ZeepExternalLauncher: ZEEP_DEPLOYMENT.externalLauncher,
+};
+
+function OnchainCard({ label, address }: { label: string; address: string }) {
+  return (
+    <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] px-4 py-3.5">
+      <div className="text-[13px] font-semibold text-[var(--muted-foreground)]">{label}</div>
+      {address ? (
+        <a
+          href={`${CHAIN.explorer}/address/${address}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={address}
+          className={cn("mt-1.5 inline-flex items-center gap-1.5 font-mono-tabular text-[14px] font-semibold hover:underline", focusRing)}
+        >
+          {address.slice(0, 6)}…{address.slice(-4)} <span aria-hidden="true" className="text-[11px] text-[var(--muted-foreground)]">↗</span>
+        </a>
+      ) : (
+        <div className="mt-1.5 text-[13px] font-semibold text-[var(--muted-foreground)]">Not deployed yet</div>
+      )}
+    </div>
+  );
+}
 
 interface PendingContract {
   name: string;
@@ -69,6 +106,21 @@ export default function ContractsPage() {
       </p>
 
       <div className="mt-8">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-[20px]">On-chain</h2>
+          <span className="text-[12px] text-[var(--muted-foreground)]">No withdraw key over any reserve · read it yourself on {CHAIN.name}.</span>
+        </div>
+        <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+          {ONCHAIN.map((c) => (
+            <OnchainCard key={c.label} label={c.label} address={c.address} />
+          ))}
+        </div>
+        <p className="mt-3 text-[12px] text-[var(--muted-foreground)]">
+          Each coin&apos;s Vault, FeeRouter and Raffle get their own addresses at launch — shown on that coin&apos;s page, not here.
+        </p>
+      </div>
+
+      <div className="mt-10">
         <h2 className="text-[20px]">External infrastructure</h2>
         <p className="mt-1.5 text-[14px] text-[var(--muted-foreground)]">
           Shared public contracts ZEEP reads from or launches through — not deployed by ZEEP.
@@ -119,9 +171,13 @@ export default function ContractsPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-mono-tabular text-[14px] font-semibold">{c.name}</span>
-                  <span className="rounded-full border border-[var(--border)] px-2 py-[2px] text-[10px] font-bold uppercase tracking-wide text-[var(--muted-foreground)]">
-                    Not deployed
-                  </span>
+                  {DEPLOYED[c.name] ? (
+                    <span className="rounded-full border border-[#4ade80]/40 px-2 py-[2px] text-[10px] font-bold uppercase tracking-wide text-[#4ade80]">Live</span>
+                  ) : (
+                    <span className="rounded-full border border-[var(--border)] px-2 py-[2px] text-[10px] font-bold uppercase tracking-wide text-[var(--muted-foreground)]">
+                      {c.name.includes("Launcher") ? "Not deployed" : "Per coin"}
+                    </span>
+                  )}
                 </div>
                 <div className="mt-0.5 max-w-[480px] text-[12px] text-[var(--muted-foreground)]">{c.role}</div>
               </div>
@@ -143,8 +199,14 @@ export default function ContractsPage() {
         <p className="mt-1.5 max-w-[640px] text-[13px] leading-relaxed text-[var(--muted-foreground)]">
           ZeepFeeRouter&apos;s 20% split goes to a single wallet controlled by the ZEEP project owner — not a DAO, not a
           multisig, not a contract with its own governance. That wallet has no access to any coin&apos;s reserve; it only
-          ever receives the protocol&apos;s own cut, the same mechanical way a reserve receives a coin&apos;s. No address is
-          listed here yet because ZeepFeeRouter isn&apos;t deployed — see the &quot;Not deployed&quot; contracts above.
+          ever receives the protocol&apos;s own cut, the same mechanical way a reserve receives a coin&apos;s.{" "}
+          {ZEEP_DEPLOYMENT.treasury ? (
+            <>
+              Treasury wallet: <CopyAddress address={ZEEP_DEPLOYMENT.treasury} />
+            </>
+          ) : (
+            <>No address is listed yet because ZEEP&apos;s contracts aren&apos;t deployed — see &quot;On-chain&quot; above.</>
+          )}
         </p>
       </div>
     </section>

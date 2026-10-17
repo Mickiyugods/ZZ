@@ -33,6 +33,12 @@ export interface Machine {
   ev: number | null;
 }
 
+/** Display name for a machine category — the API spells it "Pokemon". */
+export function categoryLabel(c?: string | null): string {
+  if (!c) return "Other";
+  return c === "Pokemon" ? "Pokémon" : c;
+}
+
 export interface GeneratePackResult {
   memo: string;
   transaction: string; // base64
@@ -126,4 +132,16 @@ export const tierName: Record<number, string> = { 1: "Epic", 2: "Rare", 3: "Unco
 export function winnerImage(w: Winner): string | null {
   const f = w.nft?.content?.files?.[0];
   return f?.cdn_uri || f?.cc_cdn || f?.uri || w.nft?.image || null;
+}
+
+/** A resized copy of a card image via Helius' public image CDN (the same CDN the
+ * API already hands back). Card scans are often 1–3 MB / ~3000px; a 128px
+ * thumbnail comes back around 7 KB. Falls back to the original on any odd URL. */
+export function cardThumb(url: string | null, width: number): string | null {
+  if (!url) return null;
+  const opts = `width=${width},quality=75,fit=scale-down`;
+  const m = url.match(/^https:\/\/cdn\.helius-rpc\.com\/cdn-cgi\/image\/[^/]*\/(https?:\/\/.+)$/);
+  if (m) return `https://cdn.helius-rpc.com/cdn-cgi/image/${opts}/${m[1]}`;
+  if (/^https?:\/\//.test(url)) return `https://cdn.helius-rpc.com/cdn-cgi/image/${opts}/${url}`;
+  return url;
 }

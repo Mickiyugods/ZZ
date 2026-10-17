@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import { usePrivy } from "@privy-io/react-auth";
-import { getMachines, getRecentWinners, tierName, winnerImage, type Machine, type Winner } from "@/lib/gacha";
+import { cardThumb, categoryLabel, getMachines, getRecentWinners, tierName, winnerImage, type Machine, type Winner } from "@/lib/gacha";
 import { useGacha } from "@/lib/useGacha";
-import { short } from "@/lib/format";
+import { fmtUsdWhole, short } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const focusRing =
@@ -62,7 +62,7 @@ function useMachines() {
 function groupByCategory(machines: Machine[]): [string, Machine[]][] {
   const map = new Map<string, Machine[]>();
   for (const m of machines) {
-    const k = m.menuCategory || "Other";
+    const k = categoryLabel(m.menuCategory);
     (map.get(k) ?? map.set(k, []).get(k)!).push(m);
   }
   return [...map.entries()];
@@ -160,7 +160,7 @@ function MachineCard({ m, onCrack, busy, disabledLabel }: { m: Machine; onCrack?
   const totalStock = m.stock ? Object.values(m.stock).reduce((a, b) => a + b, 0) : 0;
   const soldOut = totalStock === 0;
   const lowStock = !soldOut && m.lowThreshold != null && totalStock <= m.lowThreshold;
-  const label = disabledLabel ?? (soldOut ? "Sold out" : busy ? "Opening…" : `Crack a Pack · $${m.price}`);
+  const label = disabledLabel ?? (soldOut ? "Sold out" : busy ? "Opening…" : `Crack a Pack · ${fmtUsdWhole(m.price)}`);
 
   // Play the machine video only while the pointer is over the card, so idle
   // cards aren't decoding video (keeps the page light + leaving it smooth).
@@ -207,7 +207,7 @@ function MachineCard({ m, onCrack, busy, disabledLabel }: { m: Machine; onCrack?
         ) : (
           <span className="px-6 text-center text-[18px] font-semibold text-[var(--muted-foreground)]">{m.shortName || m.name}</span>
         )}
-        <span className="absolute left-3 top-3 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold backdrop-blur">{m.menuCategory}</span>
+        <span className="absolute left-3 top-3 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold backdrop-blur">{categoryLabel(m.menuCategory)}</span>
         {lowStock && (
           <span className="absolute right-3 top-3 rounded-full bg-[#D97706] px-2.5 py-1 text-[11px] font-semibold text-black">Low stock</span>
         )}
@@ -216,7 +216,7 @@ function MachineCard({ m, onCrack, busy, disabledLabel }: { m: Machine; onCrack?
       <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start justify-between gap-2">
           <h3 className="text-[16px] font-semibold leading-tight">{m.name}</h3>
-          <span className="shrink-0 font-mono-tabular text-[17px] font-semibold">${m.price}</span>
+          <span className="shrink-0 font-mono-tabular text-[17px] font-semibold">{fmtUsdWhole(m.price)}</span>
         </div>
 
         <div className="mt-3.5 grid grid-cols-4 overflow-hidden rounded-[10px] border border-[var(--border)]">
@@ -230,8 +230,8 @@ function MachineCard({ m, onCrack, busy, disabledLabel }: { m: Machine; onCrack?
         </div>
 
         <div className="mt-3 flex items-center justify-between text-[12px] text-[var(--muted-foreground)]">
-          <span className="font-mono-tabular">{totalStock.toLocaleString()} cards</span>
-          {m.ev != null && <span className="font-mono-tabular">EV ${m.ev.toFixed(0)}</span>}
+          <span className="font-mono-tabular">{totalStock.toLocaleString("en-US")} {totalStock === 1 ? "card" : "cards"}</span>
+          {m.ev != null && <span className="font-mono-tabular">EV {fmtUsdWhole(m.ev)}</span>}
         </div>
 
         <button
@@ -271,13 +271,13 @@ function LivePulls({ packType }: { packType: string }) {
         <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">Latest pulls</span>
         <div className="flex gap-2.5 overflow-x-auto">
           {winners.map((w, i) => {
-            const img = winnerImage(w);
+            const img = cardThumb(winnerImage(w), 128);
             const rt = tierName[w.prize_tier];
             return (
               <div key={i} className="group relative shrink-0" title={`${rt}${w.winner ? ` · ${short(w.winner)}` : ""}`}>
                 {img ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={img} alt={rt} loading="lazy" className="size-11 rounded-md object-cover ring-1 ring-inset" style={{ boxShadow: `inset 0 0 0 1.5px ${RARITY_COLOR[rt] ?? "transparent"}` }} />
+                  <img src={img} alt={rt} loading="lazy" decoding="async" width={44} height={44} className="size-11 rounded-md bg-[#0a0a0a] object-cover ring-1 ring-inset" style={{ boxShadow: `inset 0 0 0 1.5px ${RARITY_COLOR[rt] ?? "transparent"}` }} />
                 ) : (
                   <span className="flex size-11 items-center justify-center rounded-md border border-[var(--border)] text-[9px] text-[var(--muted-foreground)]">{rt}</span>
                 )}
@@ -356,7 +356,7 @@ function wonImage(r: NonNullable<ReturnType<typeof useGacha>["result"]>): string
 function CrackModal({ gacha }: { gacha: ReturnType<typeof useGacha> }) {
   const { phase, result, error, reset } = gacha;
   const rarity = result?.rarity;
-  const img = result ? wonImage(result) : null;
+  const img = result ? cardThumb(wonImage(result), 640) : null;
   const closable = phase !== "paying" && phase !== "opening";
   const glow = rarity ? RARITY_COLOR[rarity] : undefined;
 

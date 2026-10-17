@@ -36,8 +36,27 @@ export default function CardVaultsPage() {
 
   return (
     <>
-      <section className="mx-auto max-w-[1180px] px-6 pb-8 pt-14 text-center">
-        <h1 className="text-[34px] sm:text-[46px]">
+      <section className="relative mx-auto max-w-[1180px] px-6 pb-8 pt-14 text-center">
+        {/* the two real graded slabs already on the site, flanking the headline on wide screens */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 hidden xl:block">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/cards/pokemon-celebrations-pikachu.jpg"
+            alt=""
+            width={150}
+            height={200}
+            className="zeep-float absolute left-[3%] top-14 w-[150px] -rotate-[9deg] rounded-[10px] border border-white/10 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.9)]"
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/cards/onepiece-monkey-d-luffy-st08.jpg"
+            alt=""
+            width={140}
+            height={222}
+            className="zeep-float absolute right-[3%] top-20 w-[140px] rotate-[8deg] rounded-[10px] border border-white/10 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.9)] [animation-delay:-3s]"
+          />
+        </div>
+        <h1 className="relative text-[34px] sm:text-[46px]">
           Reserves that hunt <span className="text-[var(--primary)]">real cards</span>.
         </h1>
         <p className="mx-auto mt-3.5 max-w-[540px] text-[var(--muted-foreground)]">
@@ -65,7 +84,7 @@ export default function CardVaultsPage() {
         <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--border)] sm:grid-cols-4">
           {[
             ["Card reserves", rows ? fmtInt(rows.length) : "—"],
-            ["ETH in reserves", totals ? fmtEth(totals.vault) : "—"],
+            ["ETH in reserves", totals ? `${fmtEth(totals.vault)} ETH` : "—"],
             ["Cards held", totals ? fmtInt(totals.nfts) : "—"],
             ["Fees awaiting", totals ? `${fmtEth(totals.fees)} ETH` : "—"],
           ].map(([label, value]) => (
@@ -104,8 +123,8 @@ export default function CardVaultsPage() {
           </ol>
           <p className="mt-4 text-[12px] text-[var(--muted-foreground)]">
             Not live yet — Grail Mode needs a reserve policy that targets one specific card instead of &quot;cheapest in
-            category&quot;, plus a real-time price feed from the Solana card marketplace. The regular raffle/hold/burn
-            reserves above are real.
+            category&quot;, plus a real-time price feed from the Solana card marketplace. The regular raffle, hold and burn
+            outcomes are available at launch today.
           </p>
         </div>
       </section>

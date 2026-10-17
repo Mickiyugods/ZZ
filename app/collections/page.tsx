@@ -6,6 +6,7 @@ import { COLLECTIONS, type Category } from "@/lib/collections";
 import { listCoins, type CoinRow } from "@/lib/api";
 import { fmtEth, fmtInt } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { CHAIN_META, CHAIN_ORDER, ChainLogo, chainLabel } from "@/components/chain-logo";
 
 const focusRing =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]";
@@ -15,40 +16,6 @@ const CATS: { key: Exclude<Category, "cards"> | "all"; label: string }[] = [
   { key: "pfp", label: "PFP" },
   { key: "art", label: "Art" },
 ];
-
-// Chain display + logo. Logos live in public/images/chains/ (from the owner's
-// chain-logo set). Hyperliquid has no logo file, so it falls back to a tinted
-// monogram in its brand mint.
-const CHAIN_META: Record<string, { label: string; logo: string | null; fallbackBg: string; fallbackFg: string }> = {
-  robinhood: { label: "Robinhood", logo: "/images/chains/robinhood.png", fallbackBg: "#1f1f1f", fallbackFg: "#fff" },
-  ethereum: { label: "Ethereum", logo: "/images/chains/ethereum.png", fallbackBg: "#1f1f1f", fallbackFg: "#fff" },
-  base: { label: "Base", logo: "/images/chains/base.png", fallbackBg: "#1f1f1f", fallbackFg: "#fff" },
-  solana: { label: "Solana", logo: "/images/chains/solana.png", fallbackBg: "#1f1f1f", fallbackFg: "#fff" },
-  hyperliquid: { label: "Hyperliquid", logo: "/images/chains/hyperliquid.png", fallbackBg: "#0b3b33", fallbackFg: "#97FCE4" },
-  polygon: { label: "Polygon", logo: "/images/chains/polygon.png", fallbackBg: "#1f1f1f", fallbackFg: "#fff" },
-};
-const CHAIN_ORDER = ["robinhood", "ethereum", "base", "solana", "hyperliquid", "polygon"];
-
-function chainLabel(chain: string): string {
-  return CHAIN_META[chain]?.label ?? chain;
-}
-
-function ChainLogo({ chain, size = 18 }: { chain: string; size?: number }) {
-  const meta = CHAIN_META[chain];
-  if (meta?.logo) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={meta.logo} alt="" width={size} height={size} loading="lazy" decoding="async" className="shrink-0 rounded-full object-contain" style={{ width: size, height: size }} />;
-  }
-  return (
-    <span
-      aria-hidden="true"
-      className="flex shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
-      style={{ width: size, height: size, background: meta?.fallbackBg ?? "#1f1f1f", color: meta?.fallbackFg ?? "#fff" }}
-    >
-      {chainLabel(chain).charAt(0)}
-    </span>
-  );
-}
 
 interface Agg {
   coins: number;
@@ -120,9 +87,9 @@ export default function CollectionsPage() {
     <section className="mx-auto max-w-[1180px] px-6 pb-16 pt-12">
       <h1 className="text-[40px]">NFT Collections</h1>
       <p className="mt-2 max-w-[560px] text-[var(--muted-foreground)]">
-        {fmtInt(pfpAndArt.length)} real PFP and art collections a new coin can be paired with. Each coin sweeps exactly
-        one — native on Robinhood Chain, or via a cross-chain reserve for the rest (Ethereum, Base, Hyperliquid, Polygon,
-        Solana). Looking for graded cards?{" "}
+        {fmtInt(pfpAndArt.length)} real PFP and art collections a new coin can be paired with. Each coin collects exactly
+        one — natively on Robinhood Chain, or through a cross-chain reserve for the rest (
+        {chains.filter((c) => c !== "robinhood").map(chainLabel).join(", ")}). Looking for graded cards?{" "}
         <Link href="/cards" className="text-[var(--primary)] underline-offset-2 hover:underline">
           See Card Collections →
         </Link>

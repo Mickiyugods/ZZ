@@ -1,13 +1,7 @@
 import Link from "next/link";
 import type { CoinRow } from "@/lib/api";
 import { fmtEth, fmtInt, policyLabel } from "@/lib/format";
-import { cn } from "@/lib/utils";
-
-const POLICY_COLOR: Record<string, string> = {
-  raffle: "text-[var(--primary)]",
-  hold: "text-[#6fb7ff]",
-  burn: "text-[var(--destructive)]",
-};
+import { ChainLogo, chainLabel } from "@/components/chain-logo";
 
 export function CoinCard({ row }: { row: CoinRow }) {
   return (
@@ -20,23 +14,21 @@ export function CoinCard({ row }: { row: CoinRow }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={row.logo} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05] motion-reduce:transform-none" />
         ) : null}
-        <span
-          className={cn(
-            "absolute right-2.5 top-2.5 rounded-full border border-[var(--border)] bg-black/70 px-2.5 py-1 text-[11px] font-bold backdrop-blur-sm",
-            POLICY_COLOR[row.policy],
-          )}
-        >
+        <span className="absolute right-2.5 top-2.5 rounded-full border border-white/15 bg-black/70 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur-sm">
           {policyLabel(row.policy)}
         </span>
       </div>
       <div className="p-4">
-        <span className="text-[16px] font-bold">{row.name}</span>
-        <div className="mt-1.5 flex items-center gap-1.5 text-[12px] text-[var(--muted-foreground)]">
-          <span className="size-3.5 rounded-[4px] bg-[var(--border)]" />
-          {row.chain}
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="truncate text-[16px] font-bold">{row.name}</span>
+          <span className="shrink-0 font-mono-tabular text-[12px] text-[var(--muted-foreground)]">${row.symbol}</span>
         </div>
-        <div className="mt-2.5 text-[13px] text-[var(--muted-foreground)]">
-          Collects <strong className="font-semibold text-[var(--foreground)]">{row.collection_name}</strong>
+        {/* the chain shown is the collected collection's chain, not the coin's (always Robinhood Chain) */}
+        <div className="mt-2 flex min-w-0 items-center gap-1.5 text-[13px] text-[var(--muted-foreground)]" title={`${row.collection_name} on ${chainLabel(row.chain)}`}>
+          <ChainLogo chain={row.chain} size={14} />
+          <span className="truncate">
+            Collects <strong className="font-semibold text-[var(--foreground)]">{row.collection_name}</strong>
+          </span>
         </div>
         <div className="mt-3.5 flex items-center justify-between border-t border-[var(--border)] pt-3 font-mono-tabular text-[13px]">
           <span className="text-[var(--muted-foreground)]">Reserve</span>

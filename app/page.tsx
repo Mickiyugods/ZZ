@@ -3,8 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { listCoins, type CoinRow } from "@/lib/api";
-import { getMachines, type Machine } from "@/lib/gacha";
-import { fmtEth, fmtInt } from "@/lib/format";
+import { categoryLabel, getMachines, type Machine } from "@/lib/gacha";
+import { fmtEth, fmtInt, fmtUsdWhole } from "@/lib/format";
 import { CoinCard, CoinCardSkeleton } from "@/components/coin-card";
 import { Hero10 } from "@/components/ui/hero-10";
 import { useWallet } from "@/lib/useWallet";
@@ -37,46 +37,6 @@ const HERO_CARDS = [
   { label: "One Piece", sub: "CGC 10 PRISTINE", image: "/images/cards/onepiece-monkey-d-luffy-st08.jpg" },
 ];
 
-// `size` picks a fixed, non-responsive height so this renders consistently
-// wherever it's used (a "mini" row tile must not grow at the lg breakpoint
-// just because the hero's "showcase" variant does). `image`, when set,
-// replaces the plain text placeholder with the real card photo.
-function CardPlaceholder({
-  label,
-  sub,
-  image,
-  size = "showcase",
-  className,
-}: {
-  label: string;
-  sub: string;
-  image?: string;
-  size?: "showcase" | "mini";
-  className?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "flex aspect-[5/7] shrink-0 flex-col justify-between overflow-hidden rounded-lg border border-[var(--border)] shadow-[0_10px_24px_rgba(0,0,0,0.5)]",
-        !image && "bg-gradient-to-br from-[var(--card)] to-[var(--background)]",
-        size === "showcase" ? "h-[120px] p-2 sm:h-[180px] sm:p-2.5 lg:h-[250px]" : "h-[52px] p-1.5",
-        className,
-      )}
-    >
-      {image ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={image} alt={`${label} — ${sub}`} loading="eager" decoding="async" className="size-full object-cover" />
-      ) : (
-        <>
-          <span className={cn("font-bold uppercase leading-tight tracking-wider text-[var(--muted-foreground)]", size === "showcase" ? "text-[8px] sm:text-[10px]" : "text-[7px]")}>
-            {label}
-          </span>
-          <span className={cn("leading-tight text-[var(--muted-foreground)]", size === "showcase" ? "text-[7px] sm:text-[9px]" : "text-[6px]")}>{sub}</span>
-        </>
-      )}
-    </div>
-  );
-}
 
 // Hero showcase: 2 real card photos + 4 real NFT logos, fanned with
 // overlap/rotation for depth, sized bigger/more dramatic (2026-10 restyle,
@@ -120,36 +80,22 @@ function GachaMiniCard({ m }: { m: Machine }) {
   const { poster } = gachaMedia(m);
   return (
     <div className="flex flex-col overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)]">
-      <div className="relative flex h-[128px] items-center justify-center overflow-hidden bg-gradient-to-br from-[#171717] to-[#090909]">
+      <div className="relative flex h-[176px] items-center justify-center overflow-hidden bg-gradient-to-br from-[#171717] to-[#090909] sm:h-[196px]">
         {poster ? (
           // Static poster, not autoplaying video — the live machine videos live
-          // on /gacha; the home teaser stays light.
+          // on /gacha; the home teaser stays light. The posters carry a lot of
+          // transparent padding, so they're scaled up to read at this size.
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={poster} alt={m.name} loading="lazy" decoding="async" className="h-full w-full object-contain p-2" />
+          <img src={poster} alt={m.name} loading="lazy" decoding="async" className="h-full w-full scale-[1.18] object-contain transition-transform duration-300 ease-out group-hover:scale-[1.26] motion-reduce:transition-none" />
         ) : (
           <span className="px-3 text-center text-[12px] font-semibold text-[var(--muted-foreground)]">{m.shortName || m.name}</span>
         )}
-        <span className="absolute left-2 top-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-semibold backdrop-blur">{m.menuCategory}</span>
+        <span className="absolute left-2 top-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-semibold backdrop-blur">{categoryLabel(m.menuCategory)}</span>
       </div>
       <div className="flex items-center justify-between px-3 py-2.5">
         <span className="truncate text-[12px] font-semibold">{m.shortName || m.name}</span>
-        <span className="shrink-0 font-mono-tabular text-[13px] font-semibold">${m.price}</span>
+        <span className="shrink-0 font-mono-tabular text-[13px] font-semibold">{fmtUsdWhole(m.price)}</span>
       </div>
-    </div>
-  );
-}
-
-// Small machine thumbnail for the Card Collections tiles — the same gacha
-// machine artwork, sized to the mini card slot.
-function MachineMiniThumb({ m }: { m: Machine }) {
-  const { poster } = gachaMedia(m);
-  return (
-    <div className="aspect-[5/7] h-[76px] shrink-0 overflow-hidden rounded-lg border border-[var(--border)] bg-gradient-to-br from-[#171717] to-[#090909] sm:h-[88px]">
-      {poster ? (
-        // Static image, not autoplaying video — keeps the home page light.
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={poster} alt={m.name} loading="lazy" decoding="async" className="size-full object-contain p-1" />
-      ) : null}
     </div>
   );
 }
@@ -219,7 +165,7 @@ export default function HomePage() {
     listCoins({ list: "new" })
       .then((data) => {
         setTotals({ coins: data.coins, vaultEth: data.vaultEth, nftsHeld: data.nftsHeld });
-        setRows(data.rows.slice(0, 6));
+        setRows(data.rows.slice(0, 3));
       })
       .catch(() => setError(true));
   }, []);
@@ -240,10 +186,10 @@ export default function HomePage() {
         title="Every trade"
         titleLine2Prefix="feeds the"
         titleHighlight="reserve."
-        description="Pick an NFT collection and a payout rule when you launch — raffle, hold, or burn. From that point on, a share of every trade routes on-chain into that collection's reserve automatically. No admin key can touch it and no one can change the rule once the coin is live."
+        description="Pick an NFT collection and a payout rule when you launch — raffle, hold, or burn. From then on, a share of every trade is set aside for that collection's reserve, and the rule is locked the moment your coin goes live."
         socialProof={
           totals
-            ? `${fmtInt(totals.coins)} coins live · ${fmtEth(totals.vaultEth)} ETH working in reserves`
+            ? `${fmtInt(totals.coins)} ${totals.coins === 1 ? "coin" : "coins"} live · ${fmtEth(totals.vaultEth)} ETH working in reserves`
             : error
               ? "Live totals unavailable right now."
               : "Loading live totals…"
@@ -316,18 +262,17 @@ export default function HomePage() {
               straight to holders.
             </p>
             <div className="mt-5 grid grid-cols-2 gap-3">
-              {HERO_CARDS.map((c, i) => (
+              {HERO_CARDS.map((c) => (
                 <Link
                   key={c.label}
                   href="/cards"
-                  className={cn("flex items-center gap-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)] p-3 transition-colors duration-200 hover:border-[var(--muted-foreground)]", focusRing)}
+                  className={cn("flex flex-col items-center gap-2.5 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)] p-4 text-center transition-colors duration-200 hover:border-[var(--muted-foreground)]", focusRing)}
                 >
-                  {gachaMachines?.[i] ? (
-                    <MachineMiniThumb m={gachaMachines[i]} />
-                  ) : (
-                    <CardPlaceholder label={c.label} sub={c.sub} image={c.image} size="mini" />
-                  )}
-                  <span className="text-[13px] font-semibold">{c.label} →</span>
+                  <span className="aspect-[5/7] h-[128px] shrink-0 overflow-hidden rounded-lg border border-[var(--border)]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={c.image} alt={c.label} loading="lazy" decoding="async" className="size-full object-cover" />
+                  </span>
+                  <span className="text-[13px] font-semibold">{c.label}</span>
                 </Link>
               ))}
             </div>
@@ -353,7 +298,7 @@ export default function HomePage() {
             </div>
             <h2 className="mt-3 text-[22px]">Digital collections. On-chain reserves.</h2>
             <p className="mt-2 text-[14px] text-[var(--muted-foreground)]">
-              Pair a coin with an NFT collection. Its reserve automatically collects NFTs from real marketplace listings and
+              Pair a coin with an NFT collection. Its reserve collects NFTs from real marketplace listings and
               raffles them to holders.
             </p>
             <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -363,7 +308,8 @@ export default function HomePage() {
                   href="/collections"
                   className={cn("flex flex-col items-center gap-2 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)] p-3 text-center transition-colors duration-200 hover:border-[var(--muted-foreground)]", focusRing)}
                 >
-                  <span className="size-16 shrink-0 overflow-hidden rounded-full border border-[var(--border)] sm:size-[72px]">
+                  <span className="size-20 shrink-0 overflow-hidden rounded-full border border-[var(--border)] sm:size-[92px]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={n.image} alt={n.name} loading="lazy" decoding="async" className="size-full object-cover" />
                   </span>
                   <span className="text-[11px] font-semibold leading-tight">{n.name}</span>
@@ -397,7 +343,11 @@ export default function HomePage() {
           {rows === null ? (
             Array.from({ length: 3 }).map((_, i) => <CoinCardSkeleton key={i} />)
           ) : rows.length ? (
-            rows.map((row) => <CoinCard key={row.token} row={row} />)
+            rows.map((row, i) => (
+              <div key={row.token} className="zeep-rise" style={{ animationDelay: `${i * 60}ms` }}>
+                <CoinCard row={row} />
+              </div>
+            ))
           ) : (
             <div className="col-span-full rounded-[var(--radius)] border border-dashed border-[var(--border)] py-[70px] text-center text-[var(--muted-foreground)]">
               No coins launched yet.{" "}

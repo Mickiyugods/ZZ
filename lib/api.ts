@@ -85,3 +85,12 @@ export function listVaultEvents(token: string) {
 export function runKeeperNow() {
   return json<{ ok: true; log: string[] }>("/api/cron/keeper");
 }
+
+// Dev-only: append one simulated trade to the demo market (see /api/trades).
+export function recordDemoTrade(token: string, side: "buy" | "sell", ethValue: number) {
+  return json<{ trade: unknown }>("/api/trades", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, side, ethValue }),
+  });
+}

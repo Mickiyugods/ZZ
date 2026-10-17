@@ -473,6 +473,7 @@ export function AppSidebar() {
         onBlur={onBlur}
       >
         <Sidebar
+          id="desktop-nav-rail"
           variant="collapsible"
           collapsed={!expanded}
           onCollapsedChange={(collapsed) => setPinnedPersist(!collapsed)}

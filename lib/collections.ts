@@ -98,6 +98,7 @@ const cardCollections: Collection[] = entries
   .map((e) => {
     const onCourtyard = e.chainId === 137;
     const registry = onCourtyard ? COURTYARD : COLLECTOR_CRYPT;
+    const isOnePiece = /one\s*piece/i.test(e.name ?? "");
     return {
       slug: `${onCourtyard ? "courtyard" : "collectorcrypt"}-${e.tag ?? e.slug}`,
       name: `${e.name} (${onCourtyard ? "Courtyard" : "Collector Crypt"}-vaulted)`,
@@ -107,6 +108,8 @@ const cardCollections: Collection[] = entries
       contract: registry.contract,
       openseaSlug: onCourtyard ? COURTYARD.openseaSlug : undefined,
       searchFilter: e.match?.join(" / ") ?? e.category ?? e.name,
+      // Real graded-card photos already bundled for the home/cards pages.
+      image: isOnePiece ? "/images/cards/onepiece-monkey-d-luffy-st08.jpg" : "/images/cards/pokemon-celebrations-pikachu.jpg",
     };
   });
 

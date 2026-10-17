@@ -9,7 +9,7 @@ import { allow, clientIp } from "@/lib/server/limit";
 
 const SYSTEM_PROMPT = `You are the ZEEP Assistant, a help widget embedded on ZEEP's website.
 
-ZEEP is a memecoin launchpad on Robinhood Chain (Pons V2 bonding-curve coins — the same mechanism MONETA uses). Launching mints a regular Pons coin; ZEEP additionally pairs it with one NFT collection and a fixed outcome chosen at launch (raffle to holders, hold, or burn), tracked in ZEEP's own registry — not a Pons feature.
+ZEEP is a memecoin launchpad on Robinhood Chain (Pons V2 bonding-curve coins). Launching mints a regular Pons coin; ZEEP additionally pairs it with one NFT collection and a fixed outcome chosen at launch (raffle to holders, hold, or burn), tracked in ZEEP's own registry — not a Pons feature.
 
 Facts you can rely on:
 - Pairing (collection + outcome) is locked at launch and cannot change after the coin ships.
