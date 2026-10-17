@@ -5,13 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSyncExternalStore } from "react";
-import {
-  IconWallet,
-  IconLifebuoy,
-  IconBook2,
-  IconFileCode2,
-  IconHelpCircle,
-} from "@tabler/icons-react";
+import { IconWallet } from "@tabler/icons-react";
 import {
   HomeIcon,
   ExploreIcon,
@@ -19,8 +13,39 @@ import {
   CardStackIcon,
   NftCardIcon,
   RocketIcon,
-  ProfileIcon,
 } from "@/components/icons/zeep-icons";
+
+// Custom ZEEP sidebar icons (Gacha, Resources, Docs, Contracts, FAQ) supplied
+// as white-on-transparent PNGs. Rendered as a CSS mask over `bg-current` so the
+// glyph takes the surrounding text color — matching the SVG icons' muted →
+// white active/hover behavior exactly, with no recoloring needed per state.
+function maskIcon(src: string) {
+  function MaskIcon({ className }: { className?: string; stroke?: number }) {
+    return (
+      <span
+        aria-hidden="true"
+        className={cn("inline-block shrink-0 bg-current", className)}
+        style={{
+          maskImage: `url(${src})`,
+          WebkitMaskImage: `url(${src})`,
+          maskSize: "contain",
+          WebkitMaskSize: "contain",
+          maskRepeat: "no-repeat",
+          WebkitMaskRepeat: "no-repeat",
+          maskPosition: "center",
+          WebkitMaskPosition: "center",
+        }}
+      />
+    );
+  }
+  return MaskIcon;
+}
+
+const GachaIcon = maskIcon("/images/icons/gacha.png");
+const ResourcesIcon = maskIcon("/images/icons/resources.png");
+const DocsIcon = maskIcon("/images/icons/docs.png");
+const ContractsIcon = maskIcon("/images/icons/contracts.png");
+const FaqIcon = maskIcon("/images/icons/faq.png");
 import {
   Sidebar,
   SidebarHeader,
@@ -44,12 +69,11 @@ interface NavItemDef {
   icon: React.ComponentType<{ className?: string; stroke?: number }>;
 }
 
-const LAUNCH_ITEM: NavItemDef = { href: "/launch", label: "Launch", icon: RocketIcon };
-const PROFILE_ITEM: NavItemDef = { href: "/profile", label: "Profile", icon: ProfileIcon };
 
 const TOP_NAV: NavItemDef[] = [
   { href: "/", label: "Home", icon: HomeIcon },
   { href: "/explore", label: "Explore", icon: ExploreIcon },
+  { href: "/gacha", label: "Gacha", icon: GachaIcon },
 ];
 
 const COLLECTIONS_GROUP: NavItemDef[] = [
@@ -58,9 +82,9 @@ const COLLECTIONS_GROUP: NavItemDef[] = [
 ];
 
 const RESOURCES_GROUP: NavItemDef[] = [
-  { href: "/docs", label: "Docs", icon: IconBook2 },
-  { href: "/contracts", label: "Contracts", icon: IconFileCode2 },
-  { href: "/faq", label: "FAQ", icon: IconHelpCircle },
+  { href: "/docs", label: "Docs", icon: DocsIcon },
+  { href: "/contracts", label: "Contracts", icon: ContractsIcon },
+  { href: "/faq", label: "FAQ", icon: FaqIcon },
 ];
 
 const RAIL_WIDTH = 72;
@@ -90,9 +114,8 @@ function Brand() {
   const { collapsed } = useSidebar();
   return (
     <Link href="/" className={cn("flex min-w-0 items-center gap-2.5 rounded-lg", focusRing)} onClick={() => mobileSidebarStore.hide()}>
-      <span className="flex size-8 shrink-0 items-center justify-center rounded-[9px] bg-[var(--primary)] text-[16px] font-bold text-[var(--primary-foreground)]">
-        Z
-      </span>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/images/brand/zeep-logo.png" alt="ZEEP" decoding="async" className="size-9 shrink-0 object-contain" />
       {!collapsed && <span className="truncate font-display text-[20px] font-bold">ZEEP</span>}
     </Link>
   );
@@ -366,8 +389,6 @@ export function AppSidebar() {
 
   const navItems = (
     <SidebarSection>
-      <NavLink item={LAUNCH_ITEM} active={isActive(LAUNCH_ITEM.href)} onClick={navClick(LAUNCH_ITEM.href)} />
-
       {TOP_NAV.map((item) => (
         <NavLink key={item.href} item={item} active={isActive(item.href)} onClick={navClick(item.href)} />
       ))}
@@ -395,7 +416,7 @@ export function AppSidebar() {
 
       <NavGroup
         label="Resources"
-        icon={IconLifebuoy}
+        icon={ResourcesIcon}
         open={openGroup === "resources"}
         onOpenChange={(next) => setOpenGroup(next ? "resources" : null)}
         active={resourcesActive}
@@ -413,8 +434,6 @@ export function AppSidebar() {
           </SidebarItem>
         ))}
       </NavGroup>
-
-      <NavLink item={PROFILE_ITEM} active={isActive(PROFILE_ITEM.href)} onClick={navClick(PROFILE_ITEM.href)} />
     </SidebarSection>
   );
 

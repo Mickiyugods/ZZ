@@ -4,7 +4,6 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { Topbar } from "@/components/topbar";
 import { SiteFooter } from "@/components/site-footer";
 import { WalletDialog } from "@/components/wallet-dialog";
-import { AiAgent } from "@/components/ai-agent";
 import { PrivyAppProvider } from "@/components/providers/privy-app-provider";
 import { ToastProvider } from "@/lib/toast";
 
@@ -40,7 +39,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </div>
             </div>
             <WalletDialog />
-            <AiAgent />
           </ToastProvider>
         </PrivyAppProvider>
       </body>

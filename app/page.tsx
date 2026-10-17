@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { listCoins, type CoinRow } from "@/lib/api";
+import { getMachines, type Machine } from "@/lib/gacha";
 import { fmtEth, fmtInt } from "@/lib/format";
 import { CoinCard, CoinCardSkeleton } from "@/components/coin-card";
 import { Hero10 } from "@/components/ui/hero-10";
@@ -25,61 +26,79 @@ const HERO_NFTS = [
   { name: "Azuki", image: "https://i2c.seadn.io/collection/azuki/image/d62d4b9df96c961712b03f41c4231c/4dd62d4b9df96c961712b03f41c4231c.jpeg" },
 ];
 
-// No licensed Pokémon/One Piece card photography lives in this codebase, and
-// none is fabricated here — these are deliberately plain, labeled
-// placeholders, not real card art, consistent with "no fabricated art"
-// elsewhere in CLAUDE.md. A real card image only ever comes from the actual
-// Courtyard listing a purchase executes against, once Phase 2 ships.
+// Real photos of actual Courtyard-vaulted cards (2026-10) — not Rarible (the
+// owner hasn't gotten that API key yet, see CLAUDE.md), but a still frame
+// pulled from the same card's own public OpenSea listing media
+// (raw2.seadn.io, the same CDN already used for every other real image on
+// this page), which needs no key at all. Saved locally since there's no
+// stable hotlink to a single video frame.
 const HERO_CARDS = [
-  { label: "Pokémon", sub: "Graded cards" },
-  { label: "One Piece", sub: "Manga alt art" },
+  { label: "Pokémon", sub: "Graded cards", image: "/images/cards/pokemon-celebrations-pikachu.jpg" },
+  { label: "One Piece", sub: "CGC 10 PRISTINE", image: "/images/cards/onepiece-monkey-d-luffy-st08.jpg" },
 ];
 
 // `size` picks a fixed, non-responsive height so this renders consistently
 // wherever it's used (a "mini" row tile must not grow at the lg breakpoint
-// just because the hero's "showcase" variant does).
+// just because the hero's "showcase" variant does). `image`, when set,
+// replaces the plain text placeholder with the real card photo.
 function CardPlaceholder({
   label,
   sub,
+  image,
   size = "showcase",
   className,
 }: {
   label: string;
   sub: string;
+  image?: string;
   size?: "showcase" | "mini";
   className?: string;
 }) {
   return (
     <div
       className={cn(
-        "flex aspect-[5/7] shrink-0 flex-col justify-between rounded-lg border border-[var(--border)] bg-gradient-to-br from-[var(--card)] to-[var(--background)] shadow-[0_10px_24px_rgba(0,0,0,0.5)]",
-        size === "showcase" ? "h-[92px] p-2 sm:h-[130px] sm:p-2.5 lg:h-[170px]" : "h-[52px] p-1.5",
+        "flex aspect-[5/7] shrink-0 flex-col justify-between overflow-hidden rounded-lg border border-[var(--border)] shadow-[0_10px_24px_rgba(0,0,0,0.5)]",
+        !image && "bg-gradient-to-br from-[var(--card)] to-[var(--background)]",
+        size === "showcase" ? "h-[120px] p-2 sm:h-[180px] sm:p-2.5 lg:h-[250px]" : "h-[52px] p-1.5",
         className,
       )}
     >
-      <span className={cn("font-bold uppercase leading-tight tracking-wider text-[var(--muted-foreground)]", size === "showcase" ? "text-[8px] sm:text-[10px]" : "text-[7px]")}>
-        {label}
-      </span>
-      <span className={cn("leading-tight text-[var(--muted-foreground)]", size === "showcase" ? "text-[7px] sm:text-[9px]" : "text-[6px]")}>{sub}</span>
+      {image ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={image} alt={`${label} — ${sub}`} loading="eager" decoding="async" className="size-full object-cover" />
+      ) : (
+        <>
+          <span className={cn("font-bold uppercase leading-tight tracking-wider text-[var(--muted-foreground)]", size === "showcase" ? "text-[8px] sm:text-[10px]" : "text-[7px]")}>
+            {label}
+          </span>
+          <span className={cn("leading-tight text-[var(--muted-foreground)]", size === "showcase" ? "text-[7px] sm:text-[9px]" : "text-[6px]")}>{sub}</span>
+        </>
+      )}
     </div>
   );
 }
 
-// Compact hero showcase: 2 card placeholders + 4 real NFT logos, fanned with
-// slight overlap/rotation for depth. Sized to stay well under the hero's
-// text/CTA width — max ~170px tall / ~580px wide at desktop, scaling down
-// through tablet and mobile — and never claims to be more than a visual intro.
+// Hero showcase: 2 real card photos + 4 real NFT logos, fanned with
+// overlap/rotation for depth, sized bigger/more dramatic (2026-10 restyle,
+// matching a reference the owner supplied) — max ~250px tall / ~820px wide
+// at desktop, scaling down through tablet and mobile. A soft dark "ground"
+// shadow beneath the fan (not a glow — just a darker ellipse, kept subtle
+// per the hero-background pass's "avoid excessive glowing effects" rule)
+// gives the row something to visually stand on, like the reference.
 function HeroShowcase() {
   return (
-    <div className="flex items-center justify-center -space-x-3 sm:-space-x-4 lg:-space-x-5">
-      <CardPlaceholder label={HERO_CARDS[0].label} sub={HERO_CARDS[0].sub} className="-rotate-6 translate-y-2" />
-      <CardPlaceholder label={HERO_CARDS[1].label} sub={HERO_CARDS[1].sub} className="z-10 rotate-3" />
+    <div className="relative flex items-center justify-center -space-x-5 sm:-space-x-7 lg:-space-x-9">
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-4 bottom-2 h-1/4 rounded-[50%] bg-black/70 blur-2xl sm:inset-x-8 lg:inset-x-12"
+      />
       {HERO_NFTS.map((n, i) => (
         <div
           key={n.name}
           className={cn(
-            "aspect-square h-[56px] shrink-0 overflow-hidden rounded-xl border border-[var(--border)] shadow-[0_10px_24px_rgba(0,0,0,0.5)] sm:h-[78px] lg:h-[104px]",
-            i % 2 === 0 ? "translate-y-2.5 -rotate-3" : "-translate-y-2 rotate-3",
+            "relative aspect-square w-[108px] shrink-0 overflow-hidden rounded-2xl border border-[var(--border)] shadow-[0_18px_40px_rgba(0,0,0,0.65)] transition-transform duration-300 ease-out sm:w-[150px] lg:w-[196px]",
+            "hover:z-30 hover:-translate-y-5 hover:rotate-0 hover:scale-[1.08] hover:border-white/30 hover:shadow-[0_30px_60px_rgba(0,0,0,0.75)] motion-reduce:transition-none motion-reduce:hover:transform-none",
+            i % 2 === 0 ? "translate-y-3 -rotate-6" : "-translate-y-2 rotate-6",
           )}
         >
           <img src={n.image} alt={n.name} loading="eager" decoding="async" className="size-full object-cover" />
@@ -89,15 +108,111 @@ function HeroShowcase() {
   );
 }
 
+// Home teaser for the Gacha Station: the banner copy + CTA alongside two real
+// live machines (one Pokémon, one One Piece) pulled from the gacha API, so the
+// section shows the actual product, not just text.
+function gachaMedia(m: Machine): { video: string | null; poster: string | null } {
+  const abs = (u?: string | null) => (u && /^https?:\/\//.test(u) ? u : null);
+  return { video: abs(m.videoNobgWeb) || abs(m.videoSrc), poster: abs(m.imageNobg) || abs(m.thumbnailUrl) };
+}
+
+function GachaMiniCard({ m }: { m: Machine }) {
+  const { poster } = gachaMedia(m);
+  return (
+    <div className="flex flex-col overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)]">
+      <div className="relative flex h-[128px] items-center justify-center overflow-hidden bg-gradient-to-br from-[#171717] to-[#090909]">
+        {poster ? (
+          // Static poster, not autoplaying video — the live machine videos live
+          // on /gacha; the home teaser stays light.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={poster} alt={m.name} loading="lazy" decoding="async" className="h-full w-full object-contain p-2" />
+        ) : (
+          <span className="px-3 text-center text-[12px] font-semibold text-[var(--muted-foreground)]">{m.shortName || m.name}</span>
+        )}
+        <span className="absolute left-2 top-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-semibold backdrop-blur">{m.menuCategory}</span>
+      </div>
+      <div className="flex items-center justify-between px-3 py-2.5">
+        <span className="truncate text-[12px] font-semibold">{m.shortName || m.name}</span>
+        <span className="shrink-0 font-mono-tabular text-[13px] font-semibold">${m.price}</span>
+      </div>
+    </div>
+  );
+}
+
+// Small machine thumbnail for the Card Collections tiles — the same gacha
+// machine artwork, sized to the mini card slot.
+function MachineMiniThumb({ m }: { m: Machine }) {
+  const { poster } = gachaMedia(m);
+  return (
+    <div className="aspect-[5/7] h-[52px] shrink-0 overflow-hidden rounded-lg border border-[var(--border)] bg-gradient-to-br from-[#171717] to-[#090909]">
+      {poster ? (
+        // Static image, not autoplaying video — keeps the home page light.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={poster} alt={m.name} loading="lazy" decoding="async" className="size-full object-contain" />
+      ) : null}
+    </div>
+  );
+}
+
+function GachaHomeSection({ machines }: { machines: Machine[] | null }) {
+  return (
+    <section className="mx-auto max-w-[1180px] px-6 pb-10">
+      <Link
+        href="/gacha"
+        className={cn(
+          "group relative grid grid-cols-1 gap-7 overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] p-7 transition-all duration-200 hover:-translate-y-0.5 hover:border-white/25 hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.85)] sm:p-9 lg:grid-cols-[1fr_auto] lg:items-center motion-reduce:transform-none",
+          focusRing,
+        )}
+      >
+        <div aria-hidden className="pointer-events-none absolute -right-24 -top-28 size-80 rounded-full bg-white/[0.07] blur-[90px]" />
+        <div className="relative max-w-[520px]">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
+            <span className="size-1.5 rounded-full bg-[#4ade80]" /> New · Gacha Station
+          </span>
+          <h2 className="mt-3.5 text-[26px] sm:text-[30px]">
+            Crack a pack. Pull a <span className="text-[var(--primary)]">real graded card</span>.
+          </h2>
+          <p className="mt-2.5 text-[14px] text-[var(--muted-foreground)]">
+            Open sealed Pokémon &amp; One Piece packs, pay in USDC on Solana, and instantly pull a real, graded,
+            tokenized card — redeemable for the physical card.
+          </p>
+          <span className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--primary)] px-6 text-[14px] font-semibold text-[var(--primary-foreground)] transition-colors duration-200 group-hover:bg-[#e5e5e5]">
+            Open the Gacha Station →
+          </span>
+        </div>
+
+        <div className="relative grid w-full grid-cols-2 gap-3 lg:w-[320px]">
+          {machines === null
+            ? Array.from({ length: 2 }).map((_, i) => <div key={i} className="h-[170px] animate-pulse rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)]" />)
+            : machines.map((m) => <GachaMiniCard key={m.code} m={m} />)}
+        </div>
+      </Link>
+    </section>
+  );
+}
+
 export default function HomePage() {
   const wallet = useWallet();
   const [totals, setTotals] = React.useState<{ coins: number; vaultEth: number; nftsHeld: number } | null>(null);
   const [rows, setRows] = React.useState<CoinRow[] | null>(null);
   const [error, setError] = React.useState(false);
   const [myTotals, setMyTotals] = React.useState<{ coins: number; vaultEth: number } | null>(null);
+  // Two live gacha machines (Pokémon + One Piece), shared by the Gacha teaser
+  // and the Card Collections tiles so both show the real machine artwork.
+  const [gachaMachines, setGachaMachines] = React.useState<Machine[] | null>(null);
 
   React.useEffect(() => {
     document.title = "ZEEP — memecoins with a reserve inside";
+  }, []);
+
+  React.useEffect(() => {
+    getMachines()
+      .then((d) => {
+        const list = (d.machines || []).filter((m) => m.public !== false);
+        const pick = (cat: string) => list.find((m) => m.menuCategory === cat);
+        setGachaMachines([pick("Pokemon"), pick("One Piece")].filter(Boolean) as Machine[]);
+      })
+      .catch(() => setGachaMachines([]));
   }, []);
 
   React.useEffect(() => {
@@ -136,20 +251,25 @@ export default function HomePage() {
         mediaSlot={<HeroShowcase />}
         layout="split"
         animation="subtle"
+        backgroundImage="/images/hero/hero-planets-bg.webp"
         primaryCTA={{ ctaEnabled: true, text: "Launch a coin", link: "/launch", variant: "default" }}
         secondaryCTA={{ ctaEnabled: true, text: "Explore coins", link: "/explore", variant: "outline" }}
       />
 
       <section className="mx-auto max-w-[1180px] px-6 pb-10">
-        <div className="grid grid-cols-1 gap-px overflow-hidden rounded-[var(--radius)] border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.14)] sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           {[
             ["Coins launched", totals ? fmtInt(totals.coins) : "—"],
             ["NFTs collected", totals ? fmtInt(totals.nftsHeld) : "—"],
             ["ETH in reserves", totals ? fmtEth(totals.vaultEth) : "—"],
           ].map(([label, value]) => (
-            <div key={label} className="bg-[var(--background)] px-6 py-[22px]">
-              <div className="font-mono-tabular text-[32px] font-bold leading-none tracking-tight text-[var(--primary)]">{value}</div>
-              <div className="mt-2 text-[12px] font-medium uppercase tracking-wider text-[var(--muted-foreground)]">{label}</div>
+            <div
+              key={label}
+              className="relative overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] px-6 py-6 transition-colors duration-200 hover:border-white/20"
+            >
+              <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+              <div className="font-mono-tabular text-[38px] font-bold leading-none tracking-tight text-[var(--primary)]">{value}</div>
+              <div className="mt-2.5 text-[12px] font-medium uppercase tracking-wider text-[var(--muted-foreground)]">{label}</div>
             </div>
           ))}
         </div>
@@ -160,7 +280,7 @@ export default function HomePage() {
           <Link
             href="/profile"
             className={cn(
-              "flex flex-col items-start justify-between gap-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] px-6 py-4 hover:border-[var(--muted-foreground)] sm:flex-row sm:items-center",
+              "flex flex-col items-start justify-between gap-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] px-6 py-4 transition-colors duration-200 hover:border-[var(--muted-foreground)] sm:flex-row sm:items-center",
               focusRing,
             )}
           >
@@ -174,9 +294,11 @@ export default function HomePage() {
         </section>
       )}
 
+      <GachaHomeSection machines={gachaMachines} />
+
       <section className="mx-auto max-w-[1180px] px-6 py-16">
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-          <div className="flex flex-col rounded-[var(--radius)] border border-[var(--border)] bg-gradient-to-br from-[var(--card)] to-[var(--background)] p-7">
+          <div className="flex flex-col rounded-[var(--radius)] border border-[var(--border)] bg-gradient-to-br from-[var(--card)] to-[var(--background)] p-7 transition-colors duration-200 hover:border-white/20">
             <div className="flex items-start justify-between gap-3">
               <span className="inline-block rounded-full bg-[var(--primary)] px-2.5 py-[3px] text-[11px] font-bold tracking-wide text-[var(--primary-foreground)]">
                 Card Collections
@@ -194,13 +316,17 @@ export default function HomePage() {
               straight to holders.
             </p>
             <div className="mt-5 grid grid-cols-2 gap-3">
-              {HERO_CARDS.map((c) => (
+              {HERO_CARDS.map((c, i) => (
                 <Link
                   key={c.label}
                   href="/cards"
-                  className={cn("flex items-center gap-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)] p-3 hover:border-[var(--muted-foreground)]", focusRing)}
+                  className={cn("flex items-center gap-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)] p-3 transition-colors duration-200 hover:border-[var(--muted-foreground)]", focusRing)}
                 >
-                  <CardPlaceholder label={c.label} sub={c.sub} size="mini" />
+                  {gachaMachines?.[i] ? (
+                    <MachineMiniThumb m={gachaMachines[i]} />
+                  ) : (
+                    <CardPlaceholder label={c.label} sub={c.sub} image={c.image} size="mini" />
+                  )}
                   <span className="text-[13px] font-semibold">{c.label} →</span>
                 </Link>
               ))}
@@ -213,7 +339,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="flex flex-col rounded-[var(--radius)] border border-[var(--border)] bg-gradient-to-br from-[var(--card)] to-[var(--background)] p-7">
+          <div className="flex flex-col rounded-[var(--radius)] border border-[var(--border)] bg-gradient-to-br from-[var(--card)] to-[var(--background)] p-7 transition-colors duration-200 hover:border-white/20">
             <div className="flex items-start justify-between gap-3">
               <span className="inline-block rounded-full bg-[var(--primary)] px-2.5 py-[3px] text-[11px] font-bold tracking-wide text-[var(--primary-foreground)]">
                 NFT Collections
@@ -235,7 +361,7 @@ export default function HomePage() {
                 <Link
                   key={n.name}
                   href="/collections"
-                  className={cn("flex flex-col items-center gap-2 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)] p-3 text-center hover:border-[var(--muted-foreground)]", focusRing)}
+                  className={cn("flex flex-col items-center gap-2 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)] p-3 text-center transition-colors duration-200 hover:border-[var(--muted-foreground)]", focusRing)}
                 >
                   <span className="size-10 shrink-0 overflow-hidden rounded-full border border-[var(--border)]">
                     <img src={n.image} alt={n.name} loading="lazy" decoding="async" className="size-full object-cover" />
@@ -262,7 +388,7 @@ export default function HomePage() {
           </div>
           <Link
             href="/explore"
-            className={cn("flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] px-4 text-[13px] font-semibold hover:border-[var(--muted-foreground)]", focusRing)}
+            className={cn("flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] px-4 text-[13px] font-semibold transition-colors duration-200 hover:border-[var(--muted-foreground)]", focusRing)}
           >
             View all →
           </Link>

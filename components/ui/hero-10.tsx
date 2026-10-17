@@ -25,6 +25,10 @@ export interface Hero10Props {
   imageAlts?: string[];
   /** Custom media (e.g. a bespoke showcase) in place of the default 3-image fan. */
   mediaSlot?: React.ReactNode;
+  /** Optional CSS background image for the section itself (cover/center, with
+   * a fade-to-black at the bottom so it blends into the rest of a black
+   * page) — separate from `images`/`mediaSlot`, which are foreground content. */
+  backgroundImage?: string;
   animation?: "none" | "subtle";
   primaryCTA: CtaProps;
   secondaryCTA?: CtaProps;
@@ -183,13 +187,34 @@ export function Hero10({
   secondaryCTA,
   variant = "standard",
   layout = "stack",
+  backgroundImage,
 }: Readonly<Hero10Props>) {
   const reduce = useReducedMotion();
   const animate = animation === "subtle" && !reduce;
   const vs = variantStyles[variant];
 
+  // The source image is a wide panoramic strip (two planets near its far
+  // left/right edges, ~3:1 aspect). `bg-cover` on a short/wide desktop hero
+  // shows it properly; on the stacked mobile/tablet layout the hero is much
+  // taller relative to its width, so `cover` zooms into the image's empty
+  // black center and crops both planets out entirely. Rather than ship that
+  // accidentally-blank result, only render the background at the `lg`
+  // breakpoint — the same one `layout="split"` switches to side-by-side at,
+  // which is the composition this image was actually made for. Narrower
+  // screens fall back to the page's own plain black, which this spec's own
+  // brief allows ("a simpler dark background treatment on narrow screens").
+  const backgroundLayer = backgroundImage && (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 hidden lg:block">
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${backgroundImage})` }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
+    </div>
+  );
+
   const titleElement = title && (
-    <h1 className={cn("font-display font-normal tracking-tight text-balance text-foreground", vs.title)}>
+    <h1 className={cn("font-display font-bold tracking-[-0.02em] text-balance text-foreground", vs.title)}>
       <Balancer>{title}</Balancer>
       {(titleLine2Prefix || titleHighlight) && (
         <>
@@ -224,6 +249,7 @@ export function Hero10({
   if (layout === "split") {
     return (
       <section className="relative isolate w-full overflow-hidden bg-background">
+        {backgroundLayer}
         <motion.div
           className={cn("relative z-10 mx-auto flex max-w-6xl flex-col items-center gap-10 px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-8", vs.section)}
           variants={animate ? container : undefined}
@@ -252,6 +278,7 @@ export function Hero10({
 
   return (
     <section className="relative isolate w-full overflow-hidden bg-background">
+      {backgroundLayer}
       <motion.div
         className={cn("relative z-10 mx-auto flex max-w-6xl flex-col items-center px-6 text-center", vs.section, vs.content)}
         variants={animate ? container : undefined}

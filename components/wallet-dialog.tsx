@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useSyncExternalStore } from "react";
+import Link from "next/link";
 import { IconX } from "@tabler/icons-react";
 import { walletDialogStore } from "@/lib/walletDialogStore";
 import { useWallet } from "@/lib/useWallet";
@@ -111,6 +112,13 @@ export function WalletDialog() {
                 Switch to Robinhood Chain
               </button>
             )}
+            <Link
+              href="/profile"
+              onClick={close}
+              className={cn(btnBase, "mb-2", wallet.onChain ? "bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[#e5e5e5]" : "border border-[var(--border)]")}
+            >
+              View profile
+            </Link>
             <button
               type="button"
               className={cn(btnBase, "mb-2 border border-[var(--border)]")}

@@ -36,9 +36,8 @@ export function Topbar() {
         <BaselineDensityMediumIcon size={18} />
       </button>
       <Link href="/" className={cn("flex items-center gap-2 rounded-[var(--primitive-radius-control-sm,0.5rem)] font-display text-[17px] font-bold", focusRing)}>
-        <span className="flex size-8 items-center justify-center rounded-[9px] bg-[var(--primary)] text-[16px] font-bold text-[var(--primary-foreground)]">
-          Z
-        </span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/images/brand/zeep-logo.png" alt="ZEEP" decoding="async" className="size-8 object-contain" />
         ZEEP
       </Link>
       <button

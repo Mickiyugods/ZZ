@@ -107,13 +107,13 @@ export default function DocsPage() {
       <div className="mt-10 flex flex-wrap gap-3">
         <Link
           href="/faq"
-          className={cn("flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] px-5 text-[14px] font-semibold hover:border-[var(--muted-foreground)]", focusRing)}
+          className={cn("flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] px-5 text-[14px] font-semibold transition-colors duration-200 hover:border-[var(--muted-foreground)]", focusRing)}
         >
           Read the FAQ
         </Link>
         <Link
           href="/contracts"
-          className={cn("flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] px-5 text-[14px] font-semibold hover:border-[var(--muted-foreground)]", focusRing)}
+          className={cn("flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] px-5 text-[14px] font-semibold transition-colors duration-200 hover:border-[var(--muted-foreground)]", focusRing)}
         >
           View contracts
         </Link>

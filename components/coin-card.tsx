@@ -13,12 +13,12 @@ export function CoinCard({ row }: { row: CoinRow }) {
   return (
     <Link
       href={`/coin/${row.token}`}
-      className="group overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] transition-all hover:-translate-y-0.5 hover:border-[var(--muted-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
+      className="group overflow-hidden rounded-[var(--radius)] border border-[var(--border)] bg-[var(--card)] transition-all duration-200 hover:-translate-y-1 hover:border-white/25 hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.85)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] motion-reduce:transform-none motion-reduce:transition-none"
     >
-      <div className="relative h-[140px] bg-[var(--card)]">
+      <div className="relative h-[140px] overflow-hidden bg-gradient-to-br from-[#171717] to-[#0a0a0a]">
         {row.logo ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={row.logo} alt="" className="h-full w-full object-cover" />
+          <img src={row.logo} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05] motion-reduce:transform-none" />
         ) : null}
         <span
           className={cn(
