@@ -144,11 +144,11 @@ function GachaMiniCard({ m }: { m: Machine }) {
 function MachineMiniThumb({ m }: { m: Machine }) {
   const { poster } = gachaMedia(m);
   return (
-    <div className="aspect-[5/7] h-[52px] shrink-0 overflow-hidden rounded-lg border border-[var(--border)] bg-gradient-to-br from-[#171717] to-[#090909]">
+    <div className="aspect-[5/7] h-[76px] shrink-0 overflow-hidden rounded-lg border border-[var(--border)] bg-gradient-to-br from-[#171717] to-[#090909] sm:h-[88px]">
       {poster ? (
         // Static image, not autoplaying video — keeps the home page light.
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={poster} alt={m.name} loading="lazy" decoding="async" className="size-full object-contain" />
+        <img src={poster} alt={m.name} loading="lazy" decoding="async" className="size-full object-contain p-1" />
       ) : null}
     </div>
   );
@@ -363,7 +363,7 @@ export default function HomePage() {
                   href="/collections"
                   className={cn("flex flex-col items-center gap-2 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)] p-3 text-center transition-colors duration-200 hover:border-[var(--muted-foreground)]", focusRing)}
                 >
-                  <span className="size-10 shrink-0 overflow-hidden rounded-full border border-[var(--border)]">
+                  <span className="size-16 shrink-0 overflow-hidden rounded-full border border-[var(--border)] sm:size-[72px]">
                     <img src={n.image} alt={n.name} loading="lazy" decoding="async" className="size-full object-cover" />
                   </span>
                   <span className="text-[11px] font-semibold leading-tight">{n.name}</span>

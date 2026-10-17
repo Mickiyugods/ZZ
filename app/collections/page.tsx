@@ -16,6 +16,40 @@ const CATS: { key: Exclude<Category, "cards"> | "all"; label: string }[] = [
   { key: "art", label: "Art" },
 ];
 
+// Chain display + logo. Logos live in public/images/chains/ (from the owner's
+// chain-logo set). Hyperliquid has no logo file, so it falls back to a tinted
+// monogram in its brand mint.
+const CHAIN_META: Record<string, { label: string; logo: string | null; fallbackBg: string; fallbackFg: string }> = {
+  robinhood: { label: "Robinhood", logo: "/images/chains/robinhood.png", fallbackBg: "#1f1f1f", fallbackFg: "#fff" },
+  ethereum: { label: "Ethereum", logo: "/images/chains/ethereum.png", fallbackBg: "#1f1f1f", fallbackFg: "#fff" },
+  base: { label: "Base", logo: "/images/chains/base.png", fallbackBg: "#1f1f1f", fallbackFg: "#fff" },
+  solana: { label: "Solana", logo: "/images/chains/solana.png", fallbackBg: "#1f1f1f", fallbackFg: "#fff" },
+  hyperliquid: { label: "Hyperliquid", logo: "/images/chains/hyperliquid.png", fallbackBg: "#0b3b33", fallbackFg: "#97FCE4" },
+  polygon: { label: "Polygon", logo: "/images/chains/polygon.png", fallbackBg: "#1f1f1f", fallbackFg: "#fff" },
+};
+const CHAIN_ORDER = ["robinhood", "ethereum", "base", "solana", "hyperliquid", "polygon"];
+
+function chainLabel(chain: string): string {
+  return CHAIN_META[chain]?.label ?? chain;
+}
+
+function ChainLogo({ chain, size = 18 }: { chain: string; size?: number }) {
+  const meta = CHAIN_META[chain];
+  if (meta?.logo) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={meta.logo} alt="" width={size} height={size} loading="lazy" decoding="async" className="shrink-0 rounded-full object-contain" style={{ width: size, height: size }} />;
+  }
+  return (
+    <span
+      aria-hidden="true"
+      className="flex shrink-0 items-center justify-center rounded-full text-[10px] font-bold"
+      style={{ width: size, height: size, background: meta?.fallbackBg ?? "#1f1f1f", color: meta?.fallbackFg ?? "#fff" }}
+    >
+      {chainLabel(chain).charAt(0)}
+    </span>
+  );
+}
+
 interface Agg {
   coins: number;
   vaultEth: number;
@@ -26,6 +60,7 @@ export default function CollectionsPage() {
   const [rows, setRows] = React.useState<CoinRow[] | null>(null);
   const [error, setError] = React.useState(false);
   const [category, setCategory] = React.useState<Exclude<Category, "cards"> | "all">("all");
+  const [chain, setChain] = React.useState<string>("all");
   const [search, setSearch] = React.useState("");
   const [showAll, setShowAll] = React.useState(false);
 
@@ -53,9 +88,24 @@ export default function CollectionsPage() {
 
   // Card collections get their own page (/cards) — not mixed into this list.
   const pfpAndArt = React.useMemo(() => COLLECTIONS.filter((c) => c.category !== "cards"), []);
-  const matched = (category === "all" ? pfpAndArt : pfpAndArt.filter((c) => c.category === category)).filter((c) =>
-    search ? c.name.toLowerCase().includes(search.toLowerCase()) : true,
-  );
+
+  // Per-chain counts, ordered by the canonical chain order (unknown chains, if
+  // any, appended after).
+  const chainCounts = React.useMemo(() => {
+    const m = new Map<string, number>();
+    for (const c of pfpAndArt) m.set(c.chain, (m.get(c.chain) ?? 0) + 1);
+    return m;
+  }, [pfpAndArt]);
+  const chains = React.useMemo(() => {
+    const known = CHAIN_ORDER.filter((c) => chainCounts.has(c));
+    const extra = [...chainCounts.keys()].filter((c) => !CHAIN_ORDER.includes(c));
+    return [...known, ...extra];
+  }, [chainCounts]);
+
+  const matched = pfpAndArt
+    .filter((c) => (category === "all" ? true : c.category === category))
+    .filter((c) => (chain === "all" ? true : c.chain === chain))
+    .filter((c) => (search ? c.name.toLowerCase().includes(search.toLowerCase()) : true));
   // Rendering 400+ rows (each with a hotlinked image) at once is the main
   // reason this page used to feel heavy — cap it until the visitor searches,
   // filters, or explicitly asks for the rest.
@@ -64,7 +114,7 @@ export default function CollectionsPage() {
 
   React.useEffect(() => {
     setShowAll(false);
-  }, [category, search]);
+  }, [category, chain, search]);
 
   return (
     <section className="mx-auto max-w-[1180px] px-6 pb-16 pt-12">
@@ -121,6 +171,42 @@ export default function CollectionsPage() {
         />
       </div>
 
+      {/* Chain filter — logo chips, one per chain the registry spans. */}
+      <div role="tablist" aria-label="Filter by chain" className="mt-3 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={chain === "all"}
+          onClick={() => setChain("all")}
+          className={cn(
+            "flex min-h-9 items-center gap-2 rounded-full border px-3.5 text-[13px] font-semibold transition-colors",
+            focusRing,
+            chain === "all" ? "border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]" : "border-[var(--border)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]",
+          )}
+        >
+          All chains
+          <span className="font-mono-tabular text-[11px] opacity-70">{fmtInt(pfpAndArt.length)}</span>
+        </button>
+        {chains.map((ch) => (
+          <button
+            key={ch}
+            type="button"
+            role="tab"
+            aria-selected={chain === ch}
+            onClick={() => setChain(ch)}
+            className={cn(
+              "flex min-h-9 items-center gap-2 rounded-full border px-3 text-[13px] font-semibold transition-colors",
+              focusRing,
+              chain === ch ? "border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]" : "border-[var(--border)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]",
+            )}
+          >
+            <ChainLogo chain={ch} size={18} />
+            {chainLabel(ch)}
+            <span className="font-mono-tabular text-[11px] opacity-70">{fmtInt(chainCounts.get(ch) ?? 0)}</span>
+          </button>
+        ))}
+      </div>
+
       <div className="mt-6 overflow-x-auto rounded-[var(--radius)] border border-[var(--border)]">
         <table className="w-full min-w-[640px] border-collapse text-left text-[13px]">
           <thead>
@@ -169,7 +255,12 @@ export default function CollectionsPage() {
                         <span className="font-semibold">{c.name}</span>
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-[var(--muted-foreground)]">{c.chain}</td>
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center gap-2 text-[var(--muted-foreground)]">
+                        <ChainLogo chain={c.chain} size={18} />
+                        {chainLabel(c.chain)}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 font-mono-tabular">{rows ? fmtInt(agg?.coins ?? 0) : "—"}</td>
                     <td className="px-4 py-3 font-mono-tabular">{rows ? fmtEth(agg?.vaultEth ?? 0) : "—"}</td>
                     <td className="px-4 py-3 font-mono-tabular">{rows ? fmtInt(agg?.nftsHeld ?? 0) : "—"}</td>
