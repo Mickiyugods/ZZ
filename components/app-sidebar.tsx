@@ -60,6 +60,8 @@ import {
 import { mobileSidebarStore } from "@/lib/mobileSidebarStore";
 import { useWallet } from "@/lib/useWallet";
 import { openWallet } from "@/lib/walletDialogStore";
+import { walletIdentity } from "@/lib/identity";
+import { WalletAvatar } from "@/components/wallet-avatar";
 import { short } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -124,7 +126,8 @@ function Brand() {
 function WalletButton() {
   const { collapsed } = useSidebar();
   const wallet = useWallet();
-  const label = !wallet.connected ? "Connect wallet" : wallet.onChain ? short(wallet.address) : "Wrong network";
+  const id = wallet.address ? walletIdentity(wallet.address) : null;
+  const label = !wallet.connected ? "Connect wallet" : wallet.onChain ? `${id!.name} · ${short(wallet.address)}` : "Wrong network";
   if (collapsed) {
     return (
       <button
@@ -135,14 +138,14 @@ function WalletButton() {
         className={cn(
           "relative flex size-11 shrink-0 items-center justify-center self-center rounded-full",
           focusRing,
-          !wallet.connected ? "bg-[var(--primary)] text-[var(--primary-foreground)]" : "border border-[var(--border)] text-[var(--foreground)]",
+          !wallet.connected ? "bg-[var(--primary)] text-[var(--primary-foreground)]" : "text-[var(--foreground)]",
         )}
       >
-        <IconWallet className="size-[18px]" stroke={1.75} />
+        {wallet.address ? <WalletAvatar address={wallet.address} size={44} /> : <IconWallet className="size-[18px]" stroke={1.75} />}
         {wallet.connected && (
           <span
             aria-hidden="true"
-            className={cn("absolute right-1.5 top-1.5 size-2 rounded-full ring-2 ring-[var(--background)]", wallet.onChain ? "bg-[var(--primary)]" : "bg-[var(--destructive)]")}
+            className={cn("absolute right-0 top-0.5 size-2.5 rounded-full ring-2 ring-[var(--background)]", wallet.onChain ? "bg-[var(--primary)]" : "bg-[var(--destructive)]")}
           />
         )}
       </button>
@@ -153,14 +156,24 @@ function WalletButton() {
       type="button"
       onClick={openWallet}
       className={cn(
-        "flex min-h-11 w-full items-center justify-center rounded-full px-5 text-[14px] font-semibold transition-colors",
+        "flex min-h-11 w-full items-center rounded-full text-[14px] font-semibold transition-colors",
         focusRing,
         !wallet.connected
-          ? "bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[#e5e5e5]"
-          : "border border-[var(--border)] hover:border-[var(--muted-foreground)]",
+          ? "justify-center bg-[var(--primary)] px-5 text-[var(--primary-foreground)] hover:bg-[#e5e5e5]"
+          : "gap-2.5 border border-[var(--border)] py-1 pl-1 pr-4 text-left hover:border-[var(--muted-foreground)]",
       )}
     >
-      <span className={wallet.connected ? "font-mono-tabular" : ""}>{label}</span>
+      {wallet.address && id ? (
+        <>
+          <WalletAvatar address={wallet.address} size={36} />
+          <span className="min-w-0 leading-tight">
+            <span className="block truncate text-[13px]">{wallet.onChain ? id.name : "Wrong network"}</span>
+            <span className="block truncate font-mono-tabular text-[11px] font-normal text-[var(--muted-foreground)]">{short(wallet.address)}</span>
+          </span>
+        </>
+      ) : (
+        label
+      )}
     </button>
   );
 }

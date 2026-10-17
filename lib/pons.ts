@@ -26,6 +26,7 @@ export interface PonsLaunch {
   totalSupply: number;
   graduatedAt: number | null;
   quoteUsd: number; // Pons' own ETH/USD rate
+  artwork?: string | null; // token logo, usually ipfs://<cid> (see ponsArtwork)
   factory?: string;
   decimals?: number;
   fees?: { distributor: string | null } | null;
@@ -189,4 +190,14 @@ export async function ponsDevTransfers(m: PonsLaunch): Promise<PonsDevTransfer[]
 }
 
 /** Pons' public coin page for a token. */
-export const ponsUrl = (token: string) => `https://ponsfamily.com/launchpad/${token.toLowerCase()}`;
+/** Image URLs for a Pons coin's `artwork`, best first. ipfs:// goes through the
+ * same resizing IPFS proxy ponsfamily.com itself renders logos with (fast,
+ * small), then Pinata's public gateway as a fallback. */
+export function ponsArtwork(art?: string | null): string[] {
+  if (!art) return [];
+  const cid = art.match(/^ipfs:\/\/(?:ipfs\/)?([A-Za-z0-9]+)/)?.[1];
+  if (cid) return [`https://dbk-vercel.vercel.app/api/ipfs/content/${cid}?variant=compact`, `https://gateway.pinata.cloud/ipfs/${cid}`];
+  return /^https:\/\//.test(art) ? [art] : [];
+}
+
+export const ponsUrl =(token: string) => `https://ponsfamily.com/launchpad/${token.toLowerCase()}`;

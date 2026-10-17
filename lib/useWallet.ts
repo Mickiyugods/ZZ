@@ -11,7 +11,7 @@ function subscribe(cb: () => void) {
 export function useWallet() {
   useSyncExternalStore(
     subscribe,
-    () => `${wallet.address}:${wallet.chainId}:${wallet.ready}`,
+    () => `${wallet.address}:${wallet.chainId}:${wallet.ready}:${wallet.demo}`,
     () => "ssr",
   );
   return wallet;

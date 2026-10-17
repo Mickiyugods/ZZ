@@ -11,6 +11,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { chainLaunch } from "@/lib/server/pons-chain";
+import { ethUsd } from "@/lib/server/eth-usd";
 
 const BASE = "https://ponsfamily.com/api/launches";
 // Pons' balances indexer (what ponsfamily.com itself uses for holders and for its
@@ -46,6 +47,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ ticks: [], swaps: [] }, { status: 502 });
     }
   }
+  // USD per ETH, for valuing a wallet's ETH on /profile (Pons' own rate isn't
+  // reachable without a token, so this uses the shared CoinGecko fallback).
+  if (view === "ethusd") return NextResponse.json({ usd: await ethUsd() });
   if (!/^0x[0-9a-f]{40}$/.test(token) || !VIEWS.has(view)) {
     return NextResponse.json({ error: "bad request" }, { status: 400 });
   }

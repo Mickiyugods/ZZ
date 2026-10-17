@@ -8,6 +8,8 @@ import { mobileSidebarStore } from "@/lib/mobileSidebarStore";
 import { useWallet } from "@/lib/useWallet";
 import { openWallet } from "@/lib/walletDialogStore";
 import { short } from "@/lib/format";
+import { walletIdentity } from "@/lib/identity";
+import { WalletAvatar } from "@/components/wallet-avatar";
 import { cn } from "@/lib/utils";
 
 function subscribe(cb: () => void) {
@@ -43,12 +45,14 @@ export function Topbar() {
       <button
         type="button"
         onClick={openWallet}
+        aria-label={wallet.address ? `${walletIdentity(wallet.address).name} · ${label}` : undefined}
         className={cn(
-          "flex min-h-11 items-center justify-center rounded-full px-4 text-[13px] font-semibold",
+          "flex min-h-11 items-center justify-center rounded-full text-[13px] font-semibold",
           focusRing,
-          !wallet.connected ? "bg-[var(--primary)] text-[var(--primary-foreground)]" : "border border-[var(--border)]",
+          !wallet.connected ? "bg-[var(--primary)] px-4 text-[var(--primary-foreground)]" : "gap-2 border border-[var(--border)] py-1 pl-1 pr-3.5",
         )}
       >
+        {wallet.address && <WalletAvatar address={wallet.address} size={34} />}
         <span className={wallet.connected ? "font-mono-tabular" : ""}>{label}</span>
       </button>
     </header>
