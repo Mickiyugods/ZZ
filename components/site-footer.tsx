@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { IconArrowUpRight, IconArrowUp } from "@tabler/icons-react";
 import { CHAIN, PONS } from "@/lib/config";
+import { SocialLinks } from "@/components/social-links";
 
 const focusRing =
   "rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]";
 
 type FooterLink = { label: string; href: string; external?: boolean };
 
-// Only real destinations — ZEEP has no social accounts yet, so none are listed.
+// Only real destinations. Social accounts live in SOCIAL (lib/config.ts) and
+// render via <SocialLinks> in the brand column.
 const COLUMNS: { title: string; links: FooterLink[] }[] = [
   {
     title: "Product",
@@ -101,6 +103,7 @@ export function SiteFooter() {
             <span className="rounded-full border border-[var(--border)] px-2.5 py-1 text-[11px] font-semibold text-[var(--muted-foreground)]">Built on Pons</span>
             <span className="rounded-full border border-[var(--border)] px-2.5 py-1 text-[11px] font-semibold text-[var(--muted-foreground)]">Robinhood Chain</span>
           </div>
+          <SocialLinks className="mt-5" />
         </div>
         {COLUMNS.map((col) => (
           <nav key={col.title} aria-label={col.title}>

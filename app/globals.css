@@ -172,3 +172,55 @@ h4 {
 /* In-page anchors (docs table of contents, "Back to top") glide instead of
    jumping; the reduced-motion rule above turns this back to instant. */
 html { scroll-behavior: smooth; }
+
+/* ── Native browser chrome, themed to ZEEP ─────────────────────────────────
+   Scrollbars: slim, black track, dark-grey pill thumb, no arrow buttons.
+   Chromium/Safari use ::-webkit-scrollbar (Chrome ignores it if
+   scrollbar-color is also set, so Firefox gets its own rule below). */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--background); }
+::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border: 3px solid var(--background);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover { background: #4a4a4a; }
+::-webkit-scrollbar-thumb:active { background: #6a6a6a; }
+::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+::-webkit-scrollbar-corner { background: transparent; }
+@supports not selector(::-webkit-scrollbar) {
+  html { scrollbar-width: thin; scrollbar-color: #2a2a2a var(--background); }
+}
+
+/* Number inputs (trade amount): no native up/down arrows. */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
+/* Search inputs: replace the native clear (×) with a muted ZEEP one. */
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3a3a3' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E") center / 14px no-repeat;
+}
+input[type="search"]::-webkit-search-cancel-button:hover { opacity: 0.8; }
+input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; }
+
+/* Text selection and native control accents in brand colors. */
+::selection { background: #ffffff; color: #000000; }
+:root { accent-color: #ffffff; }
+
+/* Sidebar pin toggle: the pin tips over and settles back as it's pushed in /
+   pulled out (~240ms), crossfading between the outline and filled glyphs. */
+@keyframes zeep-pin {
+  0% { transform: rotate(0deg) scale(1); opacity: 0.4; }
+  45% { transform: rotate(-45deg) scale(0.82); opacity: 1; }
+  100% { transform: rotate(0deg) scale(1); opacity: 1; }
+}
+.zeep-pin { animation: zeep-pin 0.24s cubic-bezier(0.2, 0.7, 0.2, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .zeep-pin { animation: none !important; }
+}

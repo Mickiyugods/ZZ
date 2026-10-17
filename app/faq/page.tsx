@@ -88,9 +88,6 @@ function FaqItem({ id, question, answer, defaultOpen }: { id: string; question: 
 }
 
 export default function FaqPage() {
-  React.useEffect(() => {
-    document.title = "FAQ · ZEEP";
-  }, []);
 
   return (
     <section className="mx-auto max-w-[760px] px-6 pb-20 pt-14">

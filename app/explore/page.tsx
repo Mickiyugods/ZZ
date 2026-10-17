@@ -24,9 +24,6 @@ export default function ExplorePage() {
   const [error, setError] = React.useState(false);
   const [retry, setRetry] = React.useState(0);
 
-  React.useEffect(() => {
-    document.title = "Explore · ZEEP";
-  }, []);
 
   React.useEffect(() => {
     const t = setTimeout(() => {

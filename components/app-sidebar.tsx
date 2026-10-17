@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useSyncExternalStore } from "react";
-import { IconWallet } from "@tabler/icons-react";
+import { IconPin, IconPinFilled, IconWallet } from "@tabler/icons-react";
 import {
   HomeIcon,
   ExploreIcon,
@@ -353,6 +353,43 @@ export function AppSidebar() {
     } catch {}
   }, []);
 
+  // The header button is a pin toggle: it keeps the sidebar open (pushing the
+  // page over) or returns it to the hover rail. pinAnim replays the "push the
+  // pin in" animation on each user toggle — not on the initial restore.
+  const [pinAnim, setPinAnim] = React.useState(0);
+  const togglePin = React.useCallback(() => {
+    setPinned((p) => {
+      const next = !p;
+      try {
+        localStorage.setItem(PIN_KEY, next ? "1" : "0");
+      } catch {}
+      return next;
+    });
+    setPinAnim((n) => n + 1);
+  }, []);
+
+  // "[" toggles the pin on desktop, like Linear/Notion — ignored while typing.
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "[" || e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      if (!window.matchMedia("(min-width: 768px)").matches) return;
+      e.preventDefault();
+      togglePin();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [togglePin]);
+
+  // Width transitions only after the saved pin state has been restored, so a
+  // pinned visitor doesn't watch the page slide over on every load.
+  const [layoutReady, setLayoutReady] = React.useState(false);
+  React.useEffect(() => {
+    const id = requestAnimationFrame(() => setLayoutReady(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
   const onEnter = React.useCallback(() => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     openTimer.current = setTimeout(() => setHovering(true), OPEN_DELAY);
@@ -464,7 +501,14 @@ export function AppSidebar() {
       </div>
 
       {/* ── desktop: rail that expands on hover or when pinned ─── */}
-      <div aria-hidden="true" className="hidden shrink-0 md:block" style={{ width: RAIL_WIDTH }} />
+      {/* Reserves the sidebar's width in the page flow: the rail when unpinned (a
+          hover-expanded sidebar floats over the page), the full width when pinned
+          (it pushes the page over instead of covering it). */}
+      <div
+        aria-hidden="true"
+        className={cn("hidden shrink-0 md:block", layoutReady && "transition-[width] duration-200 ease-out motion-reduce:transition-none")}
+        style={{ width: pinned ? SIDEBAR_WIDTH : RAIL_WIDTH }}
+      />
       <div
         className="fixed inset-y-0 left-0 z-[60] hidden md:block"
         onMouseEnter={onEnter}
@@ -480,11 +524,30 @@ export function AppSidebar() {
           width={SIDEBAR_WIDTH}
           collapsedWidth={RAIL_WIDTH}
           aria-label="Main navigation"
-          className={cn("h-screen", expanded && "shadow-[40px_0_60px_-30px_rgba(0,0,0,.6)]")}
+          className={cn("h-screen", hovering && !pinned && "shadow-[40px_0_60px_-30px_rgba(0,0,0,.6)]")}
         >
           <SidebarHeader>
             <Brand />
-            <SidebarToggle className="ml-auto" onClick={() => setPinnedPersist(!pinned)} />
+            <SidebarToggle
+              className={cn("group/pin relative ml-auto size-8", pinned ? "text-[var(--foreground)]" : "text-[var(--muted-foreground)]")}
+              onClick={togglePin}
+              aria-label={pinned ? "Unpin sidebar" : "Pin sidebar open"}
+              aria-pressed={pinned}
+              aria-expanded={undefined}
+              aria-keyshortcuts="["
+            >
+              <span key={pinAnim} className={cn("flex", pinAnim > 0 && "zeep-pin")}>
+                {pinned ? <IconPinFilled className="size-[17px]" /> : <IconPin className="size-[17px]" stroke={1.75} />}
+              </span>
+              {/* fast styled tooltip (the native title tooltip waits ~700ms) */}
+              <span
+                role="tooltip"
+                className="pointer-events-none absolute right-0 top-full z-10 mt-2 flex items-center gap-2 whitespace-nowrap rounded-[var(--primitive-radius-control-sm,0.5rem)] border border-[var(--border)] bg-[var(--card)] px-2.5 py-1.5 text-[12px] font-medium text-[var(--foreground)] opacity-0 shadow-[0_4px_16px_rgba(0,0,0,0.5)] transition-opacity duration-150 group-hover/pin:opacity-100 group-hover/pin:delay-150 group-focus-visible/pin:opacity-100"
+              >
+                {pinned ? "Unpin sidebar" : "Pin sidebar open"}
+                <kbd className="rounded border border-[var(--border)] px-1.5 font-mono-tabular text-[11px] text-[var(--muted-foreground)]">[</kbd>
+              </span>
+            </SidebarToggle>
           </SidebarHeader>
           <SidebarNav>{navItems}</SidebarNav>
           <CtaWrap>

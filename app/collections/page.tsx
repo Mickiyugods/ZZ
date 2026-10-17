@@ -31,9 +31,6 @@ export default function CollectionsPage() {
   const [search, setSearch] = React.useState("");
   const [showAll, setShowAll] = React.useState(false);
 
-  React.useEffect(() => {
-    document.title = "NFT Collections · ZEEP";
-  }, []);
 
   React.useEffect(() => {
     listCoins({ list: "new" })
@@ -214,7 +211,7 @@ export default function CollectionsPage() {
                             height={28}
                             loading="lazy"
                             decoding="async"
-                            className="size-7 shrink-0 rounded-md object-cover"
+                            className="size-7 shrink-0 rounded-md bg-[var(--border)] object-cover"
                           />
                         ) : (
                           <span className="size-7 shrink-0 rounded-md bg-[var(--border)]" />

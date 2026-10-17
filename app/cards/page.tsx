@@ -14,9 +14,6 @@ export default function CardVaultsPage() {
   const [rows, setRows] = React.useState<CoinRow[] | null>(null);
   const [error, setError] = React.useState(false);
 
-  React.useEffect(() => {
-    document.title = "Card Collections · ZEEP";
-  }, []);
 
   React.useEffect(() => {
     listCoins({ list: "new" })

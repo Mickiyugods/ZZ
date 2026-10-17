@@ -243,9 +243,6 @@ export default function CoinPage({ params }: { params: Promise<{ address: string
     }
   }
 
-  React.useEffect(() => {
-    document.title = row ? `$${row.symbol} · ZEEP` : "ZEEP";
-  }, [row]);
 
   async function onAmountChange(value: string) {
     setAmount(value);

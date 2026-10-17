@@ -46,9 +46,6 @@ const FEES: [string, string, string][] = [
 export default function DocsPage() {
   const [active, setActive] = React.useState<string>(SECTIONS[0].id);
 
-  React.useEffect(() => {
-    document.title = "Docs · ZEEP";
-  }, []);
 
   // Scroll-spy: highlight the section currently in the reading band.
   React.useEffect(() => {

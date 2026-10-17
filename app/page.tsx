@@ -5,6 +5,7 @@ import Link from "next/link";
 import { listCoins, type CoinRow } from "@/lib/api";
 import { categoryLabel, getMachines, type Machine } from "@/lib/gacha";
 import { fmtEth, fmtInt, fmtUsdWhole } from "@/lib/format";
+import { SocialLinks } from "@/components/social-links";
 import { CoinCard, CoinCardSkeleton } from "@/components/coin-card";
 import { Hero10 } from "@/components/ui/hero-10";
 import { useWallet } from "@/lib/useWallet";
@@ -147,9 +148,6 @@ export default function HomePage() {
   // and the Card Collections tiles so both show the real machine artwork.
   const [gachaMachines, setGachaMachines] = React.useState<Machine[] | null>(null);
 
-  React.useEffect(() => {
-    document.title = "ZEEP — memecoins with a reserve inside";
-  }, []);
 
   React.useEffect(() => {
     getMachines()
@@ -182,6 +180,11 @@ export default function HomePage() {
 
   return (
     <>
+      {/* Home only, desktop only: ZEEP socials in the page's top-right corner
+          (a zero-height anchor so the hero below isn't shifted). */}
+      <div className="relative hidden md:block">
+        <SocialLinks className="zeep-rise absolute right-5 top-5 z-30" style={{ animationDelay: "350ms" }} />
+      </div>
       <Hero10
         title="Every trade"
         titleLine2Prefix="feeds the"

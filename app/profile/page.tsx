@@ -20,9 +20,6 @@ export default function ProfilePage() {
   const [error, setError] = React.useState(false);
   const [balance, setBalance] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    document.title = "Profile · ZEEP";
-  }, []);
 
   React.useEffect(() => {
     if (!wallet.connected || !wallet.address) {

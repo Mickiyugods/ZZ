@@ -58,6 +58,13 @@ export const MAX_CREATOR_TAX_BPS = 1000;
 // volume on live coins (0% tax → ~0.70%, 3% → 3.75%, 4% → 4.79%): ≈0.75%.
 export const PONS_CREATOR_BASE_BPS = 75;
 
+// ZEEP's official social accounts. Leave a value empty until the account
+// exists: its icon still shows, but as a non-clickable "coming soon" — never a
+// guessed link that could point at someone else's account.
+export const SOCIAL = {
+  x: "", // e.g. "https://x.com/<handle>"
+};
+
 const SOCIALS = "(string twitter, string telegram, string discord, string website, string farcaster)";
 const LAUNCH_PARAMS = `(string name, string symbol, string logo, string description, ${SOCIALS} socials, address creatorFeeRecipient, uint16 creatorTaxBps, bool buybackEnabled, bytes32 expectedEconomics, bytes32 salt)`;
 

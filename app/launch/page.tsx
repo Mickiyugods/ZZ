@@ -75,9 +75,6 @@ export default function LaunchPage() {
   const [uploading, setUploading] = React.useState(false);
   const [uploadError, setUploadError] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    document.title = "Launch · ZEEP";
-  }, []);
 
   React.useEffect(() => {
     fetch("/api/upload")

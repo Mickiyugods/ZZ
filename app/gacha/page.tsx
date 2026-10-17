@@ -42,7 +42,6 @@ function useMachines() {
   const [machines, setMachines] = React.useState<Machine[] | null>(null);
   const [error, setError] = React.useState(false);
   React.useEffect(() => {
-    document.title = "Gacha Station · ZEEP";
     getMachines()
       .then((d) =>
         setMachines(

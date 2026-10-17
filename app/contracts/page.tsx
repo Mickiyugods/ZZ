@@ -94,9 +94,6 @@ function CopyAddress({ address }: { address: string }) {
 }
 
 export default function ContractsPage() {
-  React.useEffect(() => {
-    document.title = "Contracts · ZEEP";
-  }, []);
 
   return (
     <section className="mx-auto max-w-[860px] px-6 pb-20 pt-14">

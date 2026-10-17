@@ -4,7 +4,6 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { Topbar } from "@/components/topbar";
 import { SiteFooter } from "@/components/site-footer";
 import { WalletDialog } from "@/components/wallet-dialog";
-import { TitleEnforcer } from "@/components/title-enforcer";
 import { RouteProgress } from "@/components/route-progress";
 import { PrivyAppProvider } from "@/components/providers/privy-app-provider";
 import { ToastProvider } from "@/lib/toast";
@@ -16,7 +15,8 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3473"),
   ),
   // Per-page titles render as "Explore · ZEEP" etc.; the home/default uses the
-  // full tagline. (Client pages also set document.title on navigation.)
+  // full tagline. Each route sets its own title in a small server layout.tsx
+  // (pages are client components, so they can't export metadata themselves).
   title: {
     default: "ZEEP — memecoins with a reserve inside",
     template: "%s · ZEEP",
@@ -52,7 +52,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </div>
             </div>
             <WalletDialog />
-            <TitleEnforcer />
           </ToastProvider>
         </PrivyAppProvider>
       </body>
